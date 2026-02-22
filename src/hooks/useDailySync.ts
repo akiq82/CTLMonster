@@ -1,15 +1,15 @@
 /**
- * 朝ログイン判定 → PMCボーナス、規律更新、食事リセット
+ * 朝ログイン判定 → PMCボーナス、ワークアウトTP、規律更新、食事リセット
  *
  * 1日1回（日付が変わった初回ログイン時）に実行される。
+ * RideMetrics / Health Connect の設定に基づいて実データまたはデフォルト値を使用。
  */
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useGameStore } from "../store/game-store";
 import { useMonsterStore } from "../store/monster-store";
-import { calculatePmcBonus, determinePmcRank } from "../engine/pmc-bonus";
-import { calculateDailyDisciplineChange } from "../engine/discipline";
-import { PmcRank } from "../types/ride-metrics";
+import { useSettingsStore } from "../store/settings-store";
+import { executeDailySync } from "../services/daily-sync";
 
 /**
  * 今日の日付を YYYY-MM-DD 形式で返す
@@ -19,50 +19,73 @@ function getTodayString(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-interface DailySyncOptions {
-  /** CTL値 (RideMetricsから取得、スタブ時はデフォルト) */
-  ctl?: number;
-  /** TSB値 */
-  tsb?: number;
-  /** 前日歩数 */
-  yesterdaySteps?: number;
-}
-
-export function useDailySync(options: DailySyncOptions = {}) {
-  const { ctl = 50, tsb = 0, yesterdaySteps = 5000 } = options;
-
+export function useDailySync() {
   const phase = useGameStore((s) => s.phase);
   const lastSyncDate = useGameStore((s) => s.lastSyncDate);
+  const processedWorkoutKeys = useGameStore((s) => s.processedWorkoutKeys);
   const addTp = useGameStore((s) => s.addTp);
   const markDailyBonusApplied = useGameStore((s) => s.markDailyBonusApplied);
+  const markWorkoutProcessed = useGameStore((s) => s.markWorkoutProcessed);
   const updateLastLogin = useGameStore((s) => s.updateLastLogin);
+
   const monster = useMonsterStore((s) => s.monster);
   const changeDiscipline = useMonsterStore((s) => s.changeDiscipline);
   const resetDailyMeals = useMonsterStore((s) => s.resetDailyMeals);
+
+  const rideMetricsEnabled = useSettingsStore((s) => s.rideMetricsEnabled);
+  const healthConnectEnabled = useSettingsStore(
+    (s) => s.healthConnectEnabled
+  );
+
+  // 同期中フラグ (重複実行防止)
+  const syncingRef = useRef(false);
 
   useEffect(() => {
     if (phase !== "alive" || !monster) return;
 
     const today = getTodayString();
     if (lastSyncDate === today) return;
+    if (syncingRef.current) return;
 
-    // Apply PMC bonus
-    const bonus = calculatePmcBonus(ctl, tsb, yesterdaySteps);
-    addTp({ low: bonus.tpL, mid: bonus.tpM, high: bonus.tpH });
+    syncingRef.current = true;
 
-    // Apply discipline change
-    const rank = determinePmcRank(ctl, tsb);
-    const disciplineChange = calculateDailyDisciplineChange(
-      rank,
+    executeDailySync(
+      rideMetricsEnabled,
+      healthConnectEnabled,
+      processedWorkoutKeys,
       monster.mealsYesterday
-    );
-    changeDiscipline(disciplineChange);
+    )
+      .then((result) => {
+        // PMCボーナスTP付与
+        addTp(result.pmcBonusTp);
 
-    // Reset meals
-    resetDailyMeals();
+        // ワークアウトTP付与
+        if (result.workoutTp.low > 0 || result.workoutTp.mid > 0 || result.workoutTp.high > 0) {
+          addTp(result.workoutTp);
+        }
 
-    // Mark sync
-    markDailyBonusApplied(today);
-    updateLastLogin();
+        // ワークアウト処理済みマーク
+        for (const key of result.newWorkoutKeys) {
+          markWorkoutProcessed(key);
+        }
+
+        // 規律変動
+        changeDiscipline(result.disciplineChange);
+
+        // 食事リセット
+        resetDailyMeals();
+
+        // 同期日マーク
+        markDailyBonusApplied(today);
+        updateLastLogin();
+      })
+      .catch(() => {
+        // 同期失敗時はデフォルト値でフォールバック実行
+        // (executeDailySync 内部で各APIエラーは個別にcatchされるため、
+        //  ここに来るのは想定外のエラーのみ)
+      })
+      .finally(() => {
+        syncingRef.current = false;
+      });
   }, [phase, monster?.definitionId, lastSyncDate]);
 }

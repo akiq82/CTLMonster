@@ -1,12 +1,20 @@
 /**
- * RideMetrics データ取得フック (Phase 3 スタブ)
+ * RideMetrics データ取得フック
  *
- * Phase 3 で RideMetrics MCP Server API を統合する際に実装する。
- * 現在はスタブデータを返す。
+ * settings-store の rideMetricsEnabled フラグに基づいて
+ * RideMetrics MCP Server からフィットネスサマリーを取得する。
+ *
+ * 取得頻度: マウント時 + 4時間ごと (stale check)
  */
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useSettingsStore } from "../store/settings-store";
+import { useGameStore } from "../store/game-store";
+import { fetchTrainingSummary } from "../services/ride-metrics";
 import type { TrainingSummary } from "../types/ride-metrics";
+
+/** stale 判定の閾値 (4時間) */
+const STALE_THRESHOLD_MS = 4 * 60 * 60 * 1000;
 
 interface RideMetricsData {
   /** トレーニングサマリー */
@@ -15,33 +23,53 @@ interface RideMetricsData {
   loading: boolean;
   /** エラー */
   error: string | null;
+  /** 手動リフレッシュ */
+  refresh: () => void;
 }
 
 /**
  * RideMetrics からのトレーニングデータを取得する
- *
- * Phase 3 で実装予定。現在はスタブ。
  */
 export function useRideMetrics(): RideMetricsData {
-  const [data] = useState<RideMetricsData>({
-    summary: null,
-    loading: false,
-    error: null,
-  });
+  const rideMetricsEnabled = useSettingsStore((s) => s.rideMetricsEnabled);
+  const lastFetch = useGameStore((s) => s.lastRideMetricsFetch);
+  const updateFetch = useGameStore((s) => s.updateRideMetricsFetch);
 
-  // Phase 3: ここで RideMetrics API を呼び出す
-  // useEffect(() => {
-  //   async function fetchRideMetrics() {
-  //     setData(d => ({ ...d, loading: true }));
-  //     try {
-  //       const summary = await fetch('/api/training-summary?sport=cycling');
-  //       setData({ summary: await summary.json(), loading: false, error: null });
-  //     } catch (e) {
-  //       setData(d => ({ ...d, loading: false, error: String(e) }));
-  //     }
-  //   }
-  //   fetchRideMetrics();
-  // }, []);
+  const [summary, setSummary] = useState<TrainingSummary | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  return data;
+  const doFetch = useCallback(async () => {
+    if (!rideMetricsEnabled) return;
+
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await fetchTrainingSummary();
+      setSummary(data);
+      updateFetch();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setLoading(false);
+    }
+  }, [rideMetricsEnabled, updateFetch]);
+
+  useEffect(() => {
+    if (!rideMetricsEnabled) {
+      setSummary(null);
+      return;
+    }
+
+    // stale check: 前回取得から閾値以上経過していれば再取得
+    const isStale =
+      !lastFetch ||
+      Date.now() - new Date(lastFetch).getTime() > STALE_THRESHOLD_MS;
+
+    if (isStale) {
+      doFetch();
+    }
+  }, [rideMetricsEnabled, lastFetch, doFetch]);
+
+  return { summary, loading, error, refresh: doFetch };
 }

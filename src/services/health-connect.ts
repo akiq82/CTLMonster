@@ -1,0 +1,190 @@
+/**
+ * Health Connect サービス (歩数・階段データ取得)
+ *
+ * Android: react-native-health-connect を使用して Health Connect API から取得
+ * Web: 手動入力フォールバック（将来的に Web Pedometer API 対応可能）
+ *
+ * WP変換:
+ *   1歩 = 1 WP
+ *   1階 = 100 WP
+ */
+
+import { Platform } from "react-native";
+
+/** WP変換定数 */
+export const WP_PER_STEP = 1;
+export const WP_PER_FLOOR = 100;
+
+/** Health Connect から取得したデータ */
+export interface HealthData {
+  /** 歩数 */
+  steps: number;
+  /** 階段数 */
+  floors: number;
+  /** WP (steps * 1 + floors * 100) */
+  wp: number;
+}
+
+/**
+ * Health Connect の初期化・権限リクエスト
+ *
+ * @returns 権限が付与されたか
+ */
+export async function initializeHealthConnect(): Promise<boolean> {
+  if (Platform.OS !== "android") {
+    return false;
+  }
+
+  try {
+    const { initialize, requestPermission } = await import(
+      "react-native-health-connect"
+    );
+
+    const isInitialized = await initialize();
+    if (!isInitialized) return false;
+
+    const granted = await requestPermission([
+      { accessType: "read", recordType: "Steps" },
+      { accessType: "read", recordType: "FloorsClimbed" },
+    ]);
+
+    return granted.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Health Connect が利用可能かチェックする
+ */
+export function isHealthConnectAvailable(): boolean {
+  return Platform.OS === "android";
+}
+
+/**
+ * 今日の歩数を取得する
+ *
+ * @returns 歩数 (Health Connect 未対応の場合は 0)
+ */
+async function getTodaySteps(): Promise<number> {
+  if (Platform.OS !== "android") return 0;
+
+  try {
+    const { readRecords } = await import("react-native-health-connect");
+
+    const now = new Date();
+    const startOfDay = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
+    );
+
+    const result = await readRecords("Steps", {
+      timeRangeFilter: {
+        operator: "between",
+        startTime: startOfDay.toISOString(),
+        endTime: now.toISOString(),
+      },
+    });
+
+    return result.records.reduce(
+      (sum: number, r: { count: number }) => sum + r.count,
+      0
+    );
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * 今日の階段数を取得する
+ *
+ * @returns 階段数 (Health Connect 未対応の場合は 0)
+ */
+async function getTodayFloors(): Promise<number> {
+  if (Platform.OS !== "android") return 0;
+
+  try {
+    const { readRecords } = await import("react-native-health-connect");
+
+    const now = new Date();
+    const startOfDay = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
+    );
+
+    const result = await readRecords("FloorsClimbed", {
+      timeRangeFilter: {
+        operator: "between",
+        startTime: startOfDay.toISOString(),
+        endTime: now.toISOString(),
+      },
+    });
+
+    return result.records.reduce(
+      (sum: number, r: { floors: number }) => sum + r.floors,
+      0
+    );
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * 前日の歩数を取得する（PMCボーナス計算用）
+ *
+ * @returns 前日の歩数
+ */
+export async function getYesterdaySteps(): Promise<number> {
+  if (Platform.OS !== "android") return 0;
+
+  try {
+    const { readRecords } = await import("react-native-health-connect");
+
+    const now = new Date();
+    const startOfYesterday = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() - 1
+    );
+    const endOfYesterday = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
+    );
+
+    const result = await readRecords("Steps", {
+      timeRangeFilter: {
+        operator: "between",
+        startTime: startOfYesterday.toISOString(),
+        endTime: endOfYesterday.toISOString(),
+      },
+    });
+
+    return result.records.reduce(
+      (sum: number, r: { count: number }) => sum + r.count,
+      0
+    );
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * 今日の歩数・階段データをまとめて取得しWPを計算する
+ *
+ * @returns HealthData (steps, floors, wp)
+ */
+export async function fetchHealthData(): Promise<HealthData> {
+  const [steps, floors] = await Promise.all([
+    getTodaySteps(),
+    getTodayFloors(),
+  ]);
+
+  return {
+    steps,
+    floors,
+    wp: steps * WP_PER_STEP + floors * WP_PER_FLOOR,
+  };
+}

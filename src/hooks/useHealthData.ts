@@ -1,11 +1,23 @@
 /**
- * Health Connect データ取得フック (Phase 3 スタブ)
+ * Health Connect データ取得フック
  *
- * Phase 3 で react-native-health-connect を統合する際に実装する。
- * 現在はスタブデータを返す。
+ * settings-store の healthConnectEnabled フラグに基づいて
+ * 歩数・階段データを取得しWPを計算する。
+ *
+ * Android: Health Connect API から5分ごとにポーリング
+ * Web: 利用不可 (0を返す)
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useSettingsStore } from "../store/settings-store";
+import {
+  fetchHealthData,
+  isHealthConnectAvailable,
+  initializeHealthConnect,
+} from "../services/health-connect";
+
+/** ポーリング間隔 (5分) */
+const POLL_INTERVAL_MS = 5 * 60 * 1000;
 
 interface HealthData {
   /** 今日の歩数 */
@@ -22,10 +34,11 @@ interface HealthData {
 
 /**
  * Health Connect からの歩数・階段データを取得する
- *
- * Phase 3 で実装予定。現在はスタブ。
  */
 export function useHealthData(): HealthData {
+  const healthConnectEnabled = useSettingsStore(
+    (s) => s.healthConnectEnabled
+  );
   const [data, setData] = useState<HealthData>({
     steps: 0,
     floors: 0,
@@ -33,22 +46,62 @@ export function useHealthData(): HealthData {
     loading: false,
     error: null,
   });
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const initializedRef = useRef(false);
 
-  // Phase 3: ここで Health Connect API を呼び出す
-  // useEffect(() => {
-  //   async function fetchHealthData() {
-  //     setData(d => ({ ...d, loading: true }));
-  //     try {
-  //       const steps = await getSteps();
-  //       const floors = await getFloors();
-  //       const wp = steps * WP_PER_STEP + floors * WP_PER_FLOOR;
-  //       setData({ steps, floors, wp, loading: false, error: null });
-  //     } catch (e) {
-  //       setData(d => ({ ...d, loading: false, error: String(e) }));
-  //     }
-  //   }
-  //   fetchHealthData();
-  // }, []);
+  const doFetch = useCallback(async () => {
+    setData((d) => ({ ...d, loading: true, error: null }));
+    try {
+      const result = await fetchHealthData();
+      setData({
+        steps: result.steps,
+        floors: result.floors,
+        wp: result.wp,
+        loading: false,
+        error: null,
+      });
+    } catch (e) {
+      setData((d) => ({
+        ...d,
+        loading: false,
+        error: e instanceof Error ? e.message : String(e),
+      }));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!healthConnectEnabled || !isHealthConnectAvailable()) {
+      setData({ steps: 0, floors: 0, wp: 0, loading: false, error: null });
+      return;
+    }
+
+    // 初回: Health Connect の権限を初期化
+    async function init() {
+      if (!initializedRef.current) {
+        initializedRef.current = true;
+        const ok = await initializeHealthConnect();
+        if (!ok) {
+          setData((d) => ({
+            ...d,
+            error: "Health Connect の権限が付与されていません",
+          }));
+          return;
+        }
+      }
+      doFetch();
+    }
+
+    init();
+
+    // 5分ごとにポーリング
+    intervalRef.current = setInterval(doFetch, POLL_INTERVAL_MS);
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [healthConnectEnabled, doFetch]);
 
   return data;
 }

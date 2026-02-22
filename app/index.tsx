@@ -20,6 +20,9 @@ import { useEncyclopediaStore } from "../src/store/encyclopedia-store";
 import { MONSTER_DEFINITIONS, STARTER_MONSTER_IDS } from "../src/data/monsters";
 import { EvolutionStage, type BranchType } from "../src/types/monster";
 import { determineBranchType } from "../src/engine/evolution";
+import { useDailySync } from "../src/hooks/useDailySync";
+import { useHealthData } from "../src/hooks/useHealthData";
+import { useGameLoop } from "../src/hooks/useGameLoop";
 
 const MAIN_MENU: MenuItem[] = [
   { id: "status", label: "STATUS" },
@@ -42,6 +45,22 @@ export default function HomeScreen() {
   const createMonster = useMonsterStore((s) => s.createMonster);
   const recordMeal = useMonsterStore((s) => s.recordMeal);
   const discover = useEncyclopediaStore((s) => s.discover);
+
+  // Game loop & external data hooks
+  useGameLoop();
+  useDailySync();
+  const healthData = useHealthData();
+
+  // Add WP from health data when it changes
+  const addWp = useGameStore((s) => s.addWp);
+  const lastWpRef = React.useRef(0);
+  React.useEffect(() => {
+    if (healthData.wp > lastWpRef.current) {
+      const delta = healthData.wp - lastWpRef.current;
+      addWp(delta);
+      lastWpRef.current = healthData.wp;
+    }
+  }, [healthData.wp, addWp]);
 
   const [menuIndex, setMenuIndex] = useState(0);
   const [showMeal, setShowMeal] = useState(false);

@@ -30,6 +30,10 @@ interface GameState {
   lastSyncDate: string;
   /** 最終ログイン日時 (ISO string) */
   lastLoginAt: string;
+  /** 処理済みワークアウトキー (TP付与済みの重複防止用) */
+  processedWorkoutKeys: string[];
+  /** 最終RideMetrics取得日時 (ISO string) */
+  lastRideMetricsFetch: string;
 }
 
 interface GameActions {
@@ -49,6 +53,10 @@ interface GameActions {
   markDailyBonusApplied: (date: string) => void;
   /** ログイン日時を更新する */
   updateLastLogin: () => void;
+  /** ワークアウトを処理済みとしてマークする */
+  markWorkoutProcessed: (key: string) => void;
+  /** RideMetrics取得日時を更新する */
+  updateRideMetricsFetch: () => void;
   /** ゲームをリセットする（新規開始用） */
   resetGame: () => void;
 }
@@ -61,6 +69,8 @@ const initialState: GameState = {
   dailyBonusApplied: false,
   lastSyncDate: "",
   lastLoginAt: new Date().toISOString(),
+  processedWorkoutKeys: [],
+  lastRideMetricsFetch: "",
 };
 
 export const useGameStore = create<GameState & GameActions>()(
@@ -101,6 +111,14 @@ export const useGameStore = create<GameState & GameActions>()(
 
       updateLastLogin: () =>
         set({ lastLoginAt: new Date().toISOString() }),
+
+      markWorkoutProcessed: (key) =>
+        set((state) => ({
+          processedWorkoutKeys: [...state.processedWorkoutKeys, key],
+        })),
+
+      updateRideMetricsFetch: () =>
+        set({ lastRideMetricsFetch: new Date().toISOString() }),
 
       resetGame: () => set(initialState),
     }),

@@ -3,7 +3,7 @@
  */
 
 import React from "react";
-import { View, Text, StyleSheet, Pressable, ScrollView } from "react-native";
+import { View, Text, StyleSheet, Pressable, ScrollView, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { LcdFrame, LCD_COLORS } from "../src/components/lcd-screen/LcdFrame";
 import { useSettingsStore } from "../src/store/settings-store";
@@ -55,11 +55,18 @@ export default function SettingsScreen() {
           />
 
           <Text style={styles.section}>Connections</Text>
-          <ToggleRow
-            label="Health Connect"
-            value={healthConnectEnabled}
-            onToggle={toggleHealthConnect}
-          />
+          {Platform.OS === "android" ? (
+            <ToggleRow
+              label="Health Connect"
+              value={healthConnectEnabled}
+              onToggle={toggleHealthConnect}
+            />
+          ) : (
+            <View style={styles.infoRow}>
+              <Text style={styles.toggleLabel}>Health Connect</Text>
+              <Text style={styles.toggleValue}>N/A</Text>
+            </View>
+          )}
           <ToggleRow
             label="RideMetrics"
             value={rideMetricsEnabled}
