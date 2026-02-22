@@ -1,5 +1,8 @@
-import { Stack } from 'expo-router';
+import { Stack, ErrorBoundary } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { Platform } from 'react-native';
+
+export { ErrorBoundary };
 
 export default function RootLayout() {
   return (
@@ -9,7 +12,7 @@ export default function RootLayout() {
         screenOptions={{
           headerShown: false,
           contentStyle: { backgroundColor: '#1a1a2e' },
-          animation: 'fade',
+          animation: Platform.OS === 'web' ? 'none' : 'fade',
         }}
       />
     </>

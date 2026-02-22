@@ -27,6 +27,7 @@
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro",
+      "output": "single",
       "name": "DigiRide",
       "shortName": "DigiRide",
       "themeColor": "#1a1a2e",
