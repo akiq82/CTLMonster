@@ -91,48 +91,48 @@ describe("Monster Definitions", () => {
   describe("Stage stat table (GDD 6.1)", () => {
     it("should match GDD values for Baby I", () => {
       const s = STAGE_STAT_TABLE[EvolutionStage.BABY_I];
-      expect(s.baseHp).toBe(10);
-      expect(s.baseAtk).toBe(3);
-      expect(s.baseDef).toBe(2);
-      expect(s.capHp).toBe(30);
-      expect(s.capAtk).toBe(10);
-      expect(s.capDef).toBe(8);
+      expect(s.baseHp).toBe(17);
+      expect(s.baseAtk).toBe(9);
+      expect(s.baseDef).toBe(6);
+      expect(s.capHp).toBe(50);
+      expect(s.capAtk).toBe(30);
+      expect(s.capDef).toBe(25);
     });
 
     it("should match GDD values for Mega", () => {
       const s = STAGE_STAT_TABLE[EvolutionStage.MEGA];
-      expect(s.baseHp).toBe(800);
-      expect(s.baseAtk).toBe(230);
-      expect(s.baseDef).toBe(190);
-      expect(s.capHp).toBe(3000);
-      expect(s.capAtk).toBe(800);
-      expect(s.capDef).toBe(650);
+      expect(s.baseHp).toBe(4250);
+      expect(s.baseAtk).toBe(1437);
+      expect(s.baseDef).toBe(1169);
+      expect(s.capHp).toBe(15000);
+      expect(s.capAtk).toBe(5000);
+      expect(s.capDef).toBe(4000);
     });
   });
 
   describe("Evolution requirements (GDD 6.2)", () => {
-    it("Baby I → Baby II: HP≥20, ATK≥6, DEF≥5, no boss", () => {
+    it("Baby I → Baby II: HP≥50, ATK≥20, DEF≥16, no boss", () => {
       const req = EVOLUTION_REQUIREMENTS[EvolutionStage.BABY_I];
-      expect(req.hp).toBe(20);
-      expect(req.atk).toBe(6);
-      expect(req.def).toBe(5);
+      expect(req.hp).toBe(50);
+      expect(req.atk).toBe(20);
+      expect(req.def).toBe(16);
       expect(req.bossWorld).toBeNull();
     });
 
-    it("Baby II → Rookie: HP≥40, ATK≥16, DEF≥12, W1 boss", () => {
+    it("Baby II → Rookie: HP≥120, ATK≥55, DEF≥44, no boss", () => {
       const req = EVOLUTION_REQUIREMENTS[EvolutionStage.BABY_II];
-      expect(req.hp).toBe(40);
-      expect(req.atk).toBe(16);
-      expect(req.def).toBe(12);
-      expect(req.bossWorld).toBe(1);
+      expect(req.hp).toBe(120);
+      expect(req.atk).toBe(55);
+      expect(req.def).toBe(44);
+      expect(req.bossWorld).toBeNull();
     });
 
-    it("Ultimate → Mega: HP≥800, ATK≥220, DEF≥180, W6 boss", () => {
+    it("Ultimate → Mega: HP≥1200, ATK≥500, DEF≥400, W8 boss", () => {
       const req = EVOLUTION_REQUIREMENTS[EvolutionStage.ULTIMATE];
-      expect(req.hp).toBe(800);
-      expect(req.atk).toBe(220);
-      expect(req.def).toBe(180);
-      expect(req.bossWorld).toBe(6);
+      expect(req.hp).toBe(1200);
+      expect(req.atk).toBe(500);
+      expect(req.def).toBe(400);
+      expect(req.bossWorld).toBe(8);
     });
   });
 

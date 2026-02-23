@@ -72,49 +72,52 @@ describe("Evolution Engine", () => {
   });
 
   describe("meetsStatRequirements", () => {
-    it("agumon→greymon condition: HP≥130, ATK≥40, DEF≥30 (greymon's evolutionReq)", () => {
+    it("agumon→greymon condition (greymon's evolutionReq)", () => {
+      const targetDef = MONSTER_DEFINITIONS.get("greymon")!;
+      const req = targetDef.evolutionRequirement!;
       const monster = createTestMonster({
         definitionId: "agumon",
-        maxHp: 130,
-        atk: 40,
-        def: 30,
+        maxHp: req.hp,
+        atk: req.atk,
+        def: req.def,
       });
-      // Check against the evolution TARGET's requirement
-      const targetDef = MONSTER_DEFINITIONS.get("greymon")!;
       expect(meetsStatRequirements(monster, targetDef)).toBe(true);
     });
 
     it("should fail when HP is too low for evolution target", () => {
+      const targetDef = MONSTER_DEFINITIONS.get("greymon")!;
+      const req = targetDef.evolutionRequirement!;
       const monster = createTestMonster({
         definitionId: "agumon",
-        maxHp: 129,
-        atk: 40,
-        def: 30,
+        maxHp: req.hp - 1,
+        atk: req.atk,
+        def: req.def,
       });
-      const targetDef = MONSTER_DEFINITIONS.get("greymon")!;
       expect(meetsStatRequirements(monster, targetDef)).toBe(false);
     });
 
     it("memory equipment stats should count toward requirements", () => {
+      const targetDef = MONSTER_DEFINITIONS.get("greymon")!;
+      const req = targetDef.evolutionRequirement!;
       const monster = createTestMonster({
         definitionId: "agumon",
-        maxHp: 125,
-        atk: 38,
-        def: 28,
+        maxHp: req.hp - 5,
+        atk: req.atk - 2,
+        def: req.def - 2,
         memoryEquipment: { name: "テストの記憶", hp: 5, atk: 2, def: 2 },
       });
-      const targetDef = MONSTER_DEFINITIONS.get("greymon")!;
       expect(meetsStatRequirements(monster, targetDef)).toBe(true);
     });
 
-    it("koromon→agumon condition: HP≥40, ATK≥16, DEF≥12", () => {
+    it("koromon→agumon condition (agumon's evolutionReq)", () => {
+      const targetDef = MONSTER_DEFINITIONS.get("agumon")!;
+      const req = targetDef.evolutionRequirement!;
       const monster = createTestMonster({
         definitionId: "koromon",
-        maxHp: 40,
-        atk: 16,
-        def: 12,
+        maxHp: req.hp,
+        atk: req.atk,
+        def: req.def,
       });
-      const targetDef = MONSTER_DEFINITIONS.get("agumon")!;
       expect(meetsStatRequirements(monster, targetDef)).toBe(true);
     });
   });
@@ -125,9 +128,15 @@ describe("Evolution Engine", () => {
       expect(meetsBossRequirement(def, new Map())).toBe(true);
     });
 
-    it("agumon (target) has W1 boss req → checks W1 progress", () => {
+    it("agumon (target, no boss req) → always true", () => {
       const targetDef = MONSTER_DEFINITIONS.get("agumon")!;
-      // agumon's evolutionRequirement = {hp:40, atk:16, def:12, bossWorld:1}
+      // agumon's evolutionRequirement = {hp:120, atk:55, def:44, bossWorld:null}
+      expect(meetsBossRequirement(targetDef, new Map())).toBe(true);
+    });
+
+    it("greymon (target) has W1 boss req → checks W1 progress", () => {
+      const targetDef = MONSTER_DEFINITIONS.get("greymon")!;
+      // greymon's evolutionRequirement = {hp:375, atk:144, def:117, bossWorld:1}
 
       // No progress → false
       expect(meetsBossRequirement(targetDef, new Map())).toBe(false);
@@ -141,15 +150,6 @@ describe("Evolution Engine", () => {
       expect(meetsBossRequirement(targetDef, new Map([[1, defeated]]))).toBe(true);
     });
 
-    it("greymon (target) has W2 boss req", () => {
-      const targetDef = MONSTER_DEFINITIONS.get("greymon")!;
-
-      expect(meetsBossRequirement(targetDef, new Map())).toBe(false);
-
-      const defeated: WorldProgress = { worldNumber: 2, killCount: 15, bossDefeated: true };
-      expect(meetsBossRequirement(targetDef, new Map([[2, defeated]]))).toBe(true);
-    });
-
     it("koromon (target, no boss req) → always true", () => {
       const targetDef = MONSTER_DEFINITIONS.get("koromon")!;
       expect(meetsBossRequirement(targetDef, new Map())).toBe(true);
@@ -158,38 +158,41 @@ describe("Evolution Engine", () => {
 
   describe("canEvolve", () => {
     it("should return true when all conditions met (agumon → champion)", () => {
+      // greymon's evo req: {hp:375, atk:144, def:117, bossWorld:1}
+      const greymonDef = MONSTER_DEFINITIONS.get("greymon")!;
+      const req = greymonDef.evolutionRequirement!;
       const monster = createTestMonster({
         definitionId: "agumon",
-        maxHp: 130,
-        atk: 40,
-        def: 30,
+        maxHp: req.hp,
+        atk: req.atk,
+        def: req.def,
       });
-      const worldProgress = new Map<number, WorldProgress>([
-        [2, { worldNumber: 2, killCount: 15, bossDefeated: true }],
-      ]);
-      expect(canEvolve(monster, worldProgress)).toBe(true);
-    });
-
-    it("should return true for koromon when W1 boss defeated and stats met", () => {
-      const monster = createTestMonster({
-        definitionId: "koromon",
-        maxHp: 40,
-        atk: 16,
-        def: 12,
-      });
-      // koromon→agumon requires W1 boss
       const worldProgress = new Map<number, WorldProgress>([
         [1, { worldNumber: 1, killCount: 15, bossDefeated: true }],
       ]);
       expect(canEvolve(monster, worldProgress)).toBe(true);
     });
 
-    it("should return false for koromon without W1 boss", () => {
+    it("should return true for koromon when stats met (agumon has no boss req)", () => {
+      // agumon's evo req: {hp:120, atk:55, def:44, bossWorld:null}
+      const agumonDef = MONSTER_DEFINITIONS.get("agumon")!;
+      const req = agumonDef.evolutionRequirement!;
       const monster = createTestMonster({
         definitionId: "koromon",
-        maxHp: 40,
-        atk: 16,
-        def: 12,
+        maxHp: req.hp,
+        atk: req.atk,
+        def: req.def,
+      });
+      // agumon has no boss requirement, so empty progress is fine
+      expect(canEvolve(monster, new Map())).toBe(true);
+    });
+
+    it("should return false for koromon when stats insufficient", () => {
+      const monster = createTestMonster({
+        definitionId: "koromon",
+        maxHp: 30,
+        atk: 10,
+        def: 8,
       });
       expect(canEvolve(monster, new Map())).toBe(false);
     });
@@ -197,9 +200,9 @@ describe("Evolution Engine", () => {
     it("should return false for mega stage (no evolution paths)", () => {
       const monster = createTestMonster({
         definitionId: "omegamon",
-        maxHp: 3000,
-        atk: 800,
-        def: 650,
+        maxHp: 15000,
+        atk: 5000,
+        def: 4000,
       });
       expect(canEvolve(monster, new Map())).toBe(false);
     });
@@ -265,19 +268,23 @@ describe("Evolution Engine", () => {
     });
 
     it("should keep higher stats if already above base", () => {
+      const agumonDef = MONSTER_DEFINITIONS.get("agumon")!;
       const monster = createTestMonster({
         definitionId: "koromon",
-        maxHp: 200,
-        atk: 50,
-        def: 40,
+        maxHp: agumonDef.baseStats.hp + 50,
+        atk: agumonDef.baseStats.atk + 20,
+        def: agumonDef.baseStats.def + 15,
       });
       const target = { targetId: "agumon", branchType: BranchType.HP };
+      const expectedHp = monster.maxHp;
+      const expectedAtk = monster.atk;
+      const expectedDef = monster.def;
 
       applyEvolution(monster, target);
 
-      expect(monster.maxHp).toBe(200);
-      expect(monster.atk).toBe(50);
-      expect(monster.def).toBe(40);
+      expect(monster.maxHp).toBe(expectedHp);
+      expect(monster.atk).toBe(expectedAtk);
+      expect(monster.def).toBe(expectedDef);
     });
 
     it("should fully heal HP on evolution", () => {

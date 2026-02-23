@@ -3,20 +3,20 @@
  *
  * GDD.md セクション6 に基づく。
  *
- * 進化段階別ステータス基準 (GDD 6.1):
- *   I  幼年期I:   基礎 HP10/ATK3/DEF2,    上限 HP30/ATK10/DEF8
- *   II 幼年期II:  基礎 HP25/ATK8/DEF6,    上限 HP80/ATK25/DEF20
- *   III 成長期:   基礎 HP60/ATK20/DEF15,  上限 HP200/ATK60/DEF50
- *   IV 成熟期:    基礎 HP150/ATK45/DEF35, 上限 HP500/ATK140/DEF120
- *   V  完全体:    基礎 HP350/ATK100/DEF80,上限 HP1200/ATK320/DEF270
- *   VI 究極体:    基礎 HP800/ATK230/DEF190,上限 HP3000/ATK800/DEF650
+ * 進化段階別ステータス基準:
+ *   I  幼年期I:   上限 HP50/ATK30/DEF25       (×1倍率)
+ *   II 幼年期II:  上限 HP200/ATK80/DEF65       (×2倍率)
+ *   III 成長期:   上限 HP600/ATK250/DEF200     (×5倍率)
+ *   IV 成熟期:    上限 HP2500/ATK800/DEF650    (×10倍率)
+ *   V  完全体:    上限 HP6000/ATK2500/DEF2000  (×25倍率)
+ *   VI 究極体:    上限 HP15000/ATK5000/DEF4000 (×60倍率)
  *
- * 進化条件 (GDD 6.2):
- *   I→II:   HP≥20, ATK≥6, DEF≥5,  ボスなし
- *   II→III: HP≥50, ATK≥18, DEF≥14, W1ボス
- *   III→IV: HP≥130, ATK≥40, DEF≥30, W2ボス
- *   IV→V:   HP≥350, ATK≥95, DEF≥75, W4ボス
- *   V→VI:   HP≥800, ATK≥220, DEF≥180, W6ボス
+ * 進化条件 (比例方式: statCap × ratio):
+ *   I→II:   HP×0.25, ATK×0.25, DEF×0.25, ボスなし
+ *   II→III: HP×0.20, ATK×0.22, DEF×0.22, ボスなし
+ *   III→IV: HP×0.15, ATK×0.18, DEF×0.18, W1ボス
+ *   IV→V:   HP×0.10, ATK×0.12, DEF×0.12, W3ボス
+ *   V→VI:   HP×0.08, ATK×0.10, DEF×0.10, W8ボス
  *
  * 進化分岐 (GDD 6.3):
  *   TP-L最多 → HP型, TP-M最多 → DEF型, TP-H最多 → ATK型, 均衡 → バランス型
@@ -71,52 +71,52 @@ export const STARTER_MONSTER_IDS = ["botamon", "punimon", "chibomon"] as const;
  */
 export const STAGE_STAT_TABLE = {
   [EvolutionStage.BABY_I]: {
-    baseHp: 10,
-    baseAtk: 3,
-    baseDef: 2,
-    capHp: 30,
-    capAtk: 10,
-    capDef: 8,
+    baseHp: 17,
+    baseAtk: 9,
+    baseDef: 6,
+    capHp: 50,
+    capAtk: 30,
+    capDef: 25,
   },
   [EvolutionStage.BABY_II]: {
-    baseHp: 25,
-    baseAtk: 8,
-    baseDef: 6,
-    capHp: 80,
-    capAtk: 25,
-    capDef: 20,
+    baseHp: 63,
+    baseAtk: 26,
+    baseDef: 20,
+    capHp: 200,
+    capAtk: 80,
+    capDef: 65,
   },
   [EvolutionStage.ROOKIE]: {
-    baseHp: 60,
-    baseAtk: 20,
-    baseDef: 15,
-    capHp: 200,
-    capAtk: 60,
-    capDef: 50,
+    baseHp: 195,
+    baseAtk: 83,
+    baseDef: 60,
+    capHp: 600,
+    capAtk: 250,
+    capDef: 200,
   },
   [EvolutionStage.CHAMPION]: {
-    baseHp: 150,
-    baseAtk: 45,
-    baseDef: 35,
-    capHp: 500,
-    capAtk: 140,
-    capDef: 120,
-  },
-  [EvolutionStage.ULTIMATE]: {
-    baseHp: 350,
-    baseAtk: 100,
-    baseDef: 80,
-    capHp: 1200,
-    capAtk: 320,
-    capDef: 270,
-  },
-  [EvolutionStage.MEGA]: {
     baseHp: 800,
-    baseAtk: 230,
-    baseDef: 190,
-    capHp: 3000,
+    baseAtk: 257,
+    baseDef: 189,
+    capHp: 2500,
     capAtk: 800,
     capDef: 650,
+  },
+  [EvolutionStage.ULTIMATE]: {
+    baseHp: 1900,
+    baseAtk: 781,
+    baseDef: 629,
+    capHp: 6000,
+    capAtk: 2500,
+    capDef: 2000,
+  },
+  [EvolutionStage.MEGA]: {
+    baseHp: 4250,
+    baseAtk: 1437,
+    baseDef: 1169,
+    capHp: 15000,
+    capAtk: 5000,
+    capDef: 4000,
   },
 } as const;
 
@@ -125,9 +125,9 @@ export const STAGE_STAT_TABLE = {
  * キー: 進化元の段階 → 進化先の段階
  */
 export const EVOLUTION_REQUIREMENTS = {
-  [EvolutionStage.BABY_I]: { hp: 20, atk: 6, def: 5, bossWorld: null },
-  [EvolutionStage.BABY_II]: { hp: 40, atk: 16, def: 12, bossWorld: 1 },
-  [EvolutionStage.ROOKIE]: { hp: 130, atk: 40, def: 30, bossWorld: 2 },
-  [EvolutionStage.CHAMPION]: { hp: 350, atk: 95, def: 75, bossWorld: 4 },
-  [EvolutionStage.ULTIMATE]: { hp: 800, atk: 220, def: 180, bossWorld: 6 },
+  [EvolutionStage.BABY_I]: { hp: 50, atk: 20, def: 16, bossWorld: null },
+  [EvolutionStage.BABY_II]: { hp: 120, atk: 55, def: 44, bossWorld: null as number | null },
+  [EvolutionStage.ROOKIE]: { hp: 375, atk: 144, def: 117, bossWorld: 1 as number | null },
+  [EvolutionStage.CHAMPION]: { hp: 600, atk: 300, def: 240, bossWorld: 3 as number | null },
+  [EvolutionStage.ULTIMATE]: { hp: 1200, atk: 500, def: 400, bossWorld: 8 as number | null },
 } as const;

@@ -2,7 +2,9 @@
  * 幼年期II (In-Training) モンスター定義
  *
  * GDD.md セクション6 に基づく。
- * 基礎 HP25/ATK8/DEF6, 上限 HP80/ATK25/DEF20
+ * 段階基準上限: HP200/ATK80/DEF65 (旧: HP80/ATK25/DEF20)
+ * 段階別トレーニング倍率: ×2
+ * 進化条件比率: HP×0.25, ATK×0.25, DEF×0.25
  */
 
 import {
@@ -15,9 +17,9 @@ const koromon: MonsterDefinition = {
   id: "koromon",
   name: "コロモン",
   stage: EvolutionStage.BABY_II,
-  baseStats: { hp: 25, atk: 8, def: 6 },
-  statCaps: { hp: 80, atk: 25, def: 20 },
-  evolutionRequirement: { hp: 20, atk: 6, def: 5, bossWorld: null },
+  baseStats: { hp: 63, atk: 26, def: 20 },
+  statCaps: { hp: 200, atk: 80, def: 65 },
+  evolutionRequirement: { hp: 50, atk: 20, def: 16, bossWorld: null },
   evolutionPaths: [
     { targetId: "agumon", branchType: BranchType.HP },
     { targetId: "patamon", branchType: BranchType.DEF },
@@ -32,9 +34,9 @@ const tsunomon: MonsterDefinition = {
   id: "tsunomon",
   name: "ツノモン",
   stage: EvolutionStage.BABY_II,
-  baseStats: { hp: 22, atk: 9, def: 7 },
-  statCaps: { hp: 80, atk: 25, def: 20 },
-  evolutionRequirement: { hp: 20, atk: 6, def: 5, bossWorld: null },
+  baseStats: { hp: 55, atk: 29, def: 23 },
+  statCaps: { hp: 200, atk: 80, def: 65 },
+  evolutionRequirement: { hp: 50, atk: 20, def: 16, bossWorld: null },
   evolutionPaths: [
     { targetId: "gabumon", branchType: BranchType.DEF },
     { targetId: "agumon", branchType: BranchType.HP },
@@ -49,9 +51,9 @@ const gigimon: MonsterDefinition = {
   id: "gigimon",
   name: "ギギモン",
   stage: EvolutionStage.BABY_II,
-  baseStats: { hp: 23, atk: 10, def: 5 },
-  statCaps: { hp: 80, atk: 25, def: 20 },
-  evolutionRequirement: { hp: 20, atk: 6, def: 5, bossWorld: null },
+  baseStats: { hp: 58, atk: 32, def: 16 },
+  statCaps: { hp: 200, atk: 80, def: 65 },
+  evolutionRequirement: { hp: 50, atk: 20, def: 16, bossWorld: null },
   evolutionPaths: [
     { targetId: "guilmon", branchType: BranchType.ATK },
     { targetId: "guilmon", branchType: BranchType.HP },
@@ -66,9 +68,9 @@ const tokomon: MonsterDefinition = {
   id: "tokomon",
   name: "トコモン",
   stage: EvolutionStage.BABY_II,
-  baseStats: { hp: 26, atk: 7, def: 7 },
-  statCaps: { hp: 80, atk: 25, def: 20 },
-  evolutionRequirement: { hp: 20, atk: 6, def: 5, bossWorld: null },
+  baseStats: { hp: 65, atk: 22, def: 23 },
+  statCaps: { hp: 200, atk: 80, def: 65 },
+  evolutionRequirement: { hp: 50, atk: 20, def: 16, bossWorld: null },
   evolutionPaths: [
     { targetId: "patamon", branchType: BranchType.HP },
     { targetId: "elecmon", branchType: BranchType.ATK },
@@ -83,9 +85,9 @@ const bukamon: MonsterDefinition = {
   id: "bukamon",
   name: "ブカモン",
   stage: EvolutionStage.BABY_II,
-  baseStats: { hp: 24, atk: 10, def: 5 },
-  statCaps: { hp: 80, atk: 25, def: 20 },
-  evolutionRequirement: { hp: 20, atk: 6, def: 5, bossWorld: null },
+  baseStats: { hp: 60, atk: 32, def: 16 },
+  statCaps: { hp: 200, atk: 80, def: 65 },
+  evolutionRequirement: { hp: 50, atk: 20, def: 16, bossWorld: null },
   evolutionPaths: [
     { targetId: "gomamon", branchType: BranchType.HP },
     { targetId: "renamon", branchType: BranchType.ATK },
@@ -100,9 +102,9 @@ const tanemon: MonsterDefinition = {
   id: "tanemon",
   name: "タネモン",
   stage: EvolutionStage.BABY_II,
-  baseStats: { hp: 28, atk: 6, def: 7 },
-  statCaps: { hp: 80, atk: 25, def: 20 },
-  evolutionRequirement: { hp: 20, atk: 6, def: 5, bossWorld: null },
+  baseStats: { hp: 70, atk: 19, def: 23 },
+  statCaps: { hp: 200, atk: 80, def: 65 },
+  evolutionRequirement: { hp: 50, atk: 20, def: 16, bossWorld: null },
   evolutionPaths: [
     { targetId: "palmon", branchType: BranchType.HP },
     { targetId: "gaomon", branchType: BranchType.ATK },
@@ -117,9 +119,9 @@ const nyaromon: MonsterDefinition = {
   id: "nyaromon",
   name: "ニャロモン",
   stage: EvolutionStage.BABY_II,
-  baseStats: { hp: 23, atk: 9, def: 7 },
-  statCaps: { hp: 80, atk: 25, def: 20 },
-  evolutionRequirement: { hp: 20, atk: 6, def: 5, bossWorld: null },
+  baseStats: { hp: 58, atk: 29, def: 23 },
+  statCaps: { hp: 200, atk: 80, def: 65 },
+  evolutionRequirement: { hp: 50, atk: 20, def: 16, bossWorld: null },
   evolutionPaths: [
     { targetId: "renamon", branchType: BranchType.ATK },
     { targetId: "elecmon", branchType: BranchType.HP },
@@ -136,9 +138,9 @@ const goblimon: MonsterDefinition = {
   id: "goblimon",
   name: "ゴブリモン",
   stage: EvolutionStage.BABY_II,
-  baseStats: { hp: 20, atk: 8, def: 5 },
-  statCaps: { hp: 80, atk: 25, def: 20 },
-  evolutionRequirement: { hp: 20, atk: 6, def: 5, bossWorld: null },
+  baseStats: { hp: 50, atk: 26, def: 16 },
+  statCaps: { hp: 200, atk: 80, def: 65 },
+  evolutionRequirement: { hp: 50, atk: 20, def: 16, bossWorld: null },
   evolutionPaths: [
     { targetId: "ogremon", branchType: BranchType.ATK },
     { targetId: "ogremon", branchType: BranchType.BALANCED },
@@ -153,9 +155,9 @@ const kunemon: MonsterDefinition = {
   id: "kunemon",
   name: "クネモン",
   stage: EvolutionStage.BABY_II,
-  baseStats: { hp: 18, atk: 9, def: 5 },
-  statCaps: { hp: 80, atk: 25, def: 20 },
-  evolutionRequirement: { hp: 20, atk: 6, def: 5, bossWorld: null },
+  baseStats: { hp: 45, atk: 29, def: 16 },
+  statCaps: { hp: 200, atk: 80, def: 65 },
+  evolutionRequirement: { hp: 50, atk: 20, def: 16, bossWorld: null },
   evolutionPaths: [
     { targetId: "tentomon", branchType: BranchType.ATK },
     { targetId: "wormmon", branchType: BranchType.DEF },
@@ -172,9 +174,9 @@ const demiveemon: MonsterDefinition = {
   id: "demiveemon",
   name: "チビモン",
   stage: EvolutionStage.BABY_II,
-  baseStats: { hp: 24, atk: 9, def: 6 },
-  statCaps: { hp: 80, atk: 25, def: 20 },
-  evolutionRequirement: { hp: 20, atk: 6, def: 5, bossWorld: null },
+  baseStats: { hp: 60, atk: 29, def: 20 },
+  statCaps: { hp: 200, atk: 80, def: 65 },
+  evolutionRequirement: { hp: 50, atk: 20, def: 16, bossWorld: null },
   evolutionPaths: [
     { targetId: "veemon", branchType: BranchType.ATK },
     { targetId: "veemon", branchType: BranchType.BALANCED },
@@ -189,9 +191,9 @@ const minomon: MonsterDefinition = {
   id: "minomon",
   name: "ミノモン",
   stage: EvolutionStage.BABY_II,
-  baseStats: { hp: 22, atk: 7, def: 8 },
-  statCaps: { hp: 80, atk: 25, def: 20 },
-  evolutionRequirement: { hp: 20, atk: 6, def: 5, bossWorld: null },
+  baseStats: { hp: 55, atk: 22, def: 26 },
+  statCaps: { hp: 200, atk: 80, def: 65 },
+  evolutionRequirement: { hp: 50, atk: 20, def: 16, bossWorld: null },
   evolutionPaths: [
     { targetId: "wormmon", branchType: BranchType.DEF },
     { targetId: "wormmon", branchType: BranchType.BALANCED },
@@ -206,9 +208,9 @@ const upamon: MonsterDefinition = {
   id: "upamon",
   name: "ウパモン",
   stage: EvolutionStage.BABY_II,
-  baseStats: { hp: 26, atk: 6, def: 7 },
-  statCaps: { hp: 80, atk: 25, def: 20 },
-  evolutionRequirement: { hp: 20, atk: 6, def: 5, bossWorld: null },
+  baseStats: { hp: 65, atk: 19, def: 23 },
+  statCaps: { hp: 200, atk: 80, def: 65 },
+  evolutionRequirement: { hp: 50, atk: 20, def: 16, bossWorld: null },
   evolutionPaths: [
     { targetId: "armadimon", branchType: BranchType.HP },
     { targetId: "armadimon", branchType: BranchType.DEF },
@@ -223,9 +225,9 @@ const poromon: MonsterDefinition = {
   id: "poromon",
   name: "ポロモン",
   stage: EvolutionStage.BABY_II,
-  baseStats: { hp: 23, atk: 8, def: 7 },
-  statCaps: { hp: 80, atk: 25, def: 20 },
-  evolutionRequirement: { hp: 20, atk: 6, def: 5, bossWorld: null },
+  baseStats: { hp: 58, atk: 26, def: 23 },
+  statCaps: { hp: 200, atk: 80, def: 65 },
+  evolutionRequirement: { hp: 50, atk: 20, def: 16, bossWorld: null },
   evolutionPaths: [
     { targetId: "hawkmon", branchType: BranchType.ATK },
     { targetId: "hawkmon", branchType: BranchType.BALANCED },
@@ -240,9 +242,9 @@ const motimon: MonsterDefinition = {
   id: "motimon",
   name: "モチモン",
   stage: EvolutionStage.BABY_II,
-  baseStats: { hp: 25, atk: 7, def: 6 },
-  statCaps: { hp: 80, atk: 25, def: 20 },
-  evolutionRequirement: { hp: 20, atk: 6, def: 5, bossWorld: null },
+  baseStats: { hp: 63, atk: 22, def: 20 },
+  statCaps: { hp: 200, atk: 80, def: 65 },
+  evolutionRequirement: { hp: 50, atk: 20, def: 16, bossWorld: null },
   evolutionPaths: [
     { targetId: "tentomon", branchType: BranchType.ATK },
     { targetId: "tentomon", branchType: BranchType.BALANCED },

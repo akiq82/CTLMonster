@@ -67,10 +67,11 @@ export default function BattleScreen() {
         consumeEncounter();
       }
 
+      const equipHp = monster.memoryEquipment?.hp ?? 0;
       const player: BattleFighter = {
         name: monster.name,
-        currentHp: monster.currentHp,
-        maxHp: monster.maxHp,
+        currentHp: monster.currentHp + equipHp,
+        maxHp: monster.maxHp + equipHp,
         atk: monster.atk + (monster.memoryEquipment?.atk ?? 0),
         def: monster.def + (monster.memoryEquipment?.def ?? 0),
         discipline: monster.discipline,

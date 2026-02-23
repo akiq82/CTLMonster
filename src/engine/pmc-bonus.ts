@@ -24,8 +24,8 @@ import { clamp } from "../utils/clamp";
 import { PmcRank } from "../types/ride-metrics";
 import type { PmcBonusResult } from "../types/ride-metrics";
 
-/** PMCボーナスの基礎TP値。CTL60/10k歩で約20TP/日を目安に設定。 */
-export const PMC_BASE_TP = 28;
+/** PMCボーナスの基礎TP値。CTL60/10k歩で約25TP/日を目安に設定。 */
+export const PMC_BASE_TP = 35;
 
 /**
  * PMC係数を計算する

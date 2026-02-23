@@ -2,7 +2,8 @@
  * 幼年期I (Baby I) モンスター定義
  *
  * GDD.md セクション6 に基づく。
- * 基礎 HP10/ATK3/DEF2, 上限 HP30/ATK10/DEF8
+ * 段階基準上限: HP50/ATK30/DEF25 (旧: HP30/ATK10/DEF8)
+ * 段階別トレーニング倍率: ×1
  */
 
 import {
@@ -15,8 +16,8 @@ const botamon: MonsterDefinition = {
   id: "botamon",
   name: "ボタモン",
   stage: EvolutionStage.BABY_I,
-  baseStats: { hp: 10, atk: 3, def: 2 },
-  statCaps: { hp: 30, atk: 10, def: 8 },
+  baseStats: { hp: 17, atk: 9, def: 6 },
+  statCaps: { hp: 50, atk: 30, def: 25 },
   evolutionRequirement: null,
   evolutionPaths: [
     { targetId: "koromon", branchType: BranchType.HP },
@@ -32,8 +33,8 @@ const punimon: MonsterDefinition = {
   id: "punimon",
   name: "プニモン",
   stage: EvolutionStage.BABY_I,
-  baseStats: { hp: 12, atk: 2, def: 3 },
-  statCaps: { hp: 30, atk: 10, def: 8 },
+  baseStats: { hp: 20, atk: 6, def: 9 },
+  statCaps: { hp: 50, atk: 30, def: 25 },
   evolutionRequirement: null,
   evolutionPaths: [
     { targetId: "gigimon", branchType: BranchType.HP },
@@ -49,8 +50,8 @@ const yuramon: MonsterDefinition = {
   id: "yuramon",
   name: "ユラモン",
   stage: EvolutionStage.BABY_I,
-  baseStats: { hp: 11, atk: 2, def: 3 },
-  statCaps: { hp: 30, atk: 10, def: 8 },
+  baseStats: { hp: 18, atk: 6, def: 9 },
+  statCaps: { hp: 50, atk: 30, def: 25 },
   evolutionRequirement: null,
   evolutionPaths: [
     { targetId: "tanemon", branchType: BranchType.HP },
@@ -66,8 +67,8 @@ const zurumon: MonsterDefinition = {
   id: "zurumon",
   name: "ズルモン",
   stage: EvolutionStage.BABY_I,
-  baseStats: { hp: 10, atk: 4, def: 2 },
-  statCaps: { hp: 30, atk: 10, def: 8 },
+  baseStats: { hp: 17, atk: 12, def: 6 },
+  statCaps: { hp: 50, atk: 30, def: 25 },
   evolutionRequirement: null,
   evolutionPaths: [
     { targetId: "goblimon", branchType: BranchType.HP },
@@ -85,8 +86,8 @@ const chibomon: MonsterDefinition = {
   id: "chibomon",
   name: "チコモン",
   stage: EvolutionStage.BABY_I,
-  baseStats: { hp: 11, atk: 3, def: 2 },
-  statCaps: { hp: 30, atk: 10, def: 8 },
+  baseStats: { hp: 18, atk: 9, def: 6 },
+  statCaps: { hp: 50, atk: 30, def: 25 },
   evolutionRequirement: null,
   evolutionPaths: [
     { targetId: "demiveemon", branchType: BranchType.HP },
@@ -102,8 +103,8 @@ const leafmon: MonsterDefinition = {
   id: "leafmon",
   name: "リーフモン",
   stage: EvolutionStage.BABY_I,
-  baseStats: { hp: 10, atk: 2, def: 3 },
-  statCaps: { hp: 30, atk: 10, def: 8 },
+  baseStats: { hp: 17, atk: 6, def: 9 },
+  statCaps: { hp: 50, atk: 30, def: 25 },
   evolutionRequirement: null,
   evolutionPaths: [
     { targetId: "minomon", branchType: BranchType.DEF },
@@ -119,8 +120,8 @@ const tsubumon: MonsterDefinition = {
   id: "tsubumon",
   name: "ツブモン",
   stage: EvolutionStage.BABY_I,
-  baseStats: { hp: 12, atk: 2, def: 3 },
-  statCaps: { hp: 30, atk: 10, def: 8 },
+  baseStats: { hp: 20, atk: 6, def: 9 },
+  statCaps: { hp: 50, atk: 30, def: 25 },
   evolutionRequirement: null,
   evolutionPaths: [
     { targetId: "upamon", branchType: BranchType.HP },
