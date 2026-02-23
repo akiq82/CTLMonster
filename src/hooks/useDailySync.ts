@@ -24,6 +24,7 @@ export function useDailySync() {
   const lastSyncDate = useGameStore((s) => s.lastSyncDate);
   const processedWorkoutKeys = useGameStore((s) => s.processedWorkoutKeys);
   const addTp = useGameStore((s) => s.addTp);
+  const addWp = useGameStore((s) => s.addWp);
   const markDailyBonusApplied = useGameStore((s) => s.markDailyBonusApplied);
   const markWorkoutProcessed = useGameStore((s) => s.markWorkoutProcessed);
   const updateLastLogin = useGameStore((s) => s.updateLastLogin);
@@ -53,7 +54,9 @@ export function useDailySync() {
       rideMetricsEnabled,
       healthConnectEnabled,
       processedWorkoutKeys,
-      monster.mealsYesterday
+      monster.mealsYesterday,
+      lastSyncDate,
+      monster.bornAt
     )
       .then((result) => {
         // PMCボーナスTP付与
@@ -67,6 +70,16 @@ export function useDailySync() {
         // ワークアウト処理済みマーク
         for (const key of result.newWorkoutKeys) {
           markWorkoutProcessed(key);
+        }
+
+        // ライドWP付与
+        if (result.rideWp > 0) {
+          addWp(result.rideWp);
+        }
+
+        // 歩数救済WP付与
+        if (result.rescuedWp > 0) {
+          addWp(result.rescuedWp);
         }
 
         // 規律変動

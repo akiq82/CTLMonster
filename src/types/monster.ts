@@ -125,6 +125,8 @@ export interface MonsterState {
   mealsToday: number;
   /** 前日の食事回数 */
   mealsYesterday: number;
+  /** 残り食事ボーナス回数（トレーニング実行で1消費） */
+  mealBonusRemaining: number;
   /** 最終ログイン日時 (ISO string) */
   lastLoginAt: string;
   /** 戦闘勝利数 */

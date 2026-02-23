@@ -9,7 +9,7 @@
  *   TSBボーナス = (15 - clamp(TSB, -30, 15)) / 45        // 0.0〜1.0
  *   PMC係数 = 0.5 + (CTLボーナス × 0.7) + (TSBボーナス × 0.3)  // 0.5〜1.5
  *   歩数係数 = min(前日歩数 / 10000, 1.5)                // 0〜1.5
- *   基礎TP = floor(8 × PMC係数 × 歩数係数)
+ *   基礎TP = floor(28 × PMC係数 × 歩数係数)
  *
  * 配分: 基礎TPは均等に3系統へ分配（端数はTP-Lへ）
  *
@@ -23,6 +23,9 @@
 import { clamp } from "../utils/clamp";
 import { PmcRank } from "../types/ride-metrics";
 import type { PmcBonusResult } from "../types/ride-metrics";
+
+/** PMCボーナスの基礎TP値。CTL60/10k歩で約20TP/日を目安に設定。 */
+export const PMC_BASE_TP = 28;
 
 /**
  * PMC係数を計算する
@@ -77,7 +80,7 @@ export function calculatePmcBonus(
   const rank = determinePmcRank(ctl, tsb);
   const pmcFactor = calculatePmcFactor(ctl, tsb);
   const stepsFactor = calculateStepsFactor(yesterdaySteps);
-  const totalTp = Math.floor(8 * pmcFactor * stepsFactor);
+  const totalTp = Math.floor(PMC_BASE_TP * pmcFactor * stepsFactor);
 
   // 均等に3系統へ分配（端数はTP-Lへ）
   const perSystem = Math.floor(totalTp / 3);

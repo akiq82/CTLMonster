@@ -3,9 +3,10 @@
  *
  * LcdFrame内にモンスタースプライト、ステータスバー、メニューを表示。
  * ゲームの中心となる画面。
+ * 起動時はセーブスロット選択画面を表示する。
  */
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { View, Text, TextInput, StyleSheet, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { LcdFrame, LCD_COLORS } from "../src/components/lcd-screen/LcdFrame";
@@ -17,6 +18,8 @@ import { useGameStore } from "../src/store/game-store";
 import { useMonsterStore } from "../src/store/monster-store";
 import { useWorldStore } from "../src/store/world-store";
 import { useEncyclopediaStore } from "../src/store/encyclopedia-store";
+import { useSlotStore, SLOT_COUNT, type SlotSummary } from "../src/store/slot-store";
+import { migrateLegacyData } from "../src/store/migration";
 import { MONSTER_DEFINITIONS, STARTER_MONSTER_IDS } from "../src/data/monsters";
 import { EvolutionStage, type BranchType } from "../src/types/monster";
 import { determineBranchType } from "../src/engine/evolution";
@@ -34,6 +37,114 @@ const MAIN_MENU: MenuItem[] = [
   { id: "settings", label: "CONFIG" },
 ];
 
+// ─── SaveSelect コンポーネント ──────────────────────────
+interface SaveSelectProps {
+  summaries: SlotSummary[];
+  onSelect: (slot: number) => void;
+  onDelete: (slot: number) => void;
+}
+
+function SaveSelect({ summaries, onSelect, onDelete }: SaveSelectProps) {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
+
+  const handleUp = useCallback(() => {
+    if (confirmDelete !== null) return;
+    setSelectedIndex((i) => (i - 1 + SLOT_COUNT) % SLOT_COUNT);
+  }, [confirmDelete]);
+
+  const handleDown = useCallback(() => {
+    if (confirmDelete !== null) return;
+    setSelectedIndex((i) => (i + 1) % SLOT_COUNT);
+  }, [confirmDelete]);
+
+  const handleSelect = useCallback(() => {
+    if (confirmDelete !== null) {
+      // 削除確認中: 決定で削除実行
+      onDelete(confirmDelete);
+      setConfirmDelete(null);
+      return;
+    }
+    onSelect(selectedIndex);
+  }, [selectedIndex, confirmDelete, onSelect, onDelete]);
+
+  const handleLongPress = useCallback(
+    (slot: number) => {
+      if (summaries[slot].occupied) {
+        setConfirmDelete(slot);
+      }
+    },
+    [summaries]
+  );
+
+  return (
+    <View style={styles.container}>
+      <LcdFrame
+        onPressA={handleUp}
+        onPressB={handleSelect}
+        onPressC={handleDown}
+        buttonLabels={{ a: "A ▲", b: "B ●", c: "C ▼" }}
+      >
+        <View style={styles.saveSelectContent}>
+          <Text style={styles.saveSelectTitle}>SAVE SELECT</Text>
+
+          {confirmDelete !== null ? (
+            <View style={styles.deleteConfirm}>
+              <Text style={styles.deleteConfirmText}>
+                SLOT {confirmDelete + 1} を削除？
+              </Text>
+              <Text style={styles.deleteConfirmSub}>
+                B:DELETE / A:CANCEL
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.slotList}>
+              {summaries.map((summary, index) => (
+                <Pressable
+                  key={index}
+                  style={[
+                    styles.slotItem,
+                    selectedIndex === index && styles.slotItemSelected,
+                  ]}
+                  onPress={() => {
+                    setSelectedIndex(index);
+                    onSelect(index);
+                  }}
+                  onLongPress={() => handleLongPress(index)}
+                >
+                  <View style={styles.slotHeader}>
+                    <Text style={styles.slotCursor}>
+                      {selectedIndex === index ? "▶" : " "}
+                    </Text>
+                    <Text style={styles.slotLabel}>
+                      SLOT {index + 1}
+                    </Text>
+                  </View>
+                  {summary.occupied ? (
+                    <View style={styles.slotInfo}>
+                      <Text style={styles.slotMonsterName}>
+                        {summary.monsterName || "---"} G{summary.generation}
+                      </Text>
+                      <Text style={styles.slotDetail}>
+                        {MONSTER_DEFINITIONS.get(summary.definitionId)?.name ??
+                          summary.definitionId}{" "}
+                        ({summary.phase})
+                      </Text>
+                    </View>
+                  ) : (
+                    <Text style={styles.slotEmpty}>- EMPTY -</Text>
+                  )}
+                </Pressable>
+              ))}
+            </View>
+          )}
+        </View>
+      </LcdFrame>
+    </View>
+  );
+}
+
+// ─── HomeScreen ──────────────────────────────────────────
 export default function HomeScreen() {
   const router = useRouter();
   const phase = useGameStore((s) => s.phase);
@@ -41,12 +152,27 @@ export default function HomeScreen() {
   const setPlayerName = useGameStore((s) => s.setPlayerName);
   const tp = useGameStore((s) => s.tp);
   const wp = useGameStore((s) => s.wp);
+  const encounterCount = useGameStore((s) => s.encounterCount);
   const monster = useMonsterStore((s) => s.monster);
   const createMonster = useMonsterStore((s) => s.createMonster);
   const recordMeal = useMonsterStore((s) => s.recordMeal);
   const discover = useEncyclopediaStore((s) => s.discover);
+  const resetForRebirth = useGameStore((s) => s.resetForRebirth);
 
-  // Game loop & external data hooks
+  // Slot store
+  const slotSelected = useSlotStore((s) => s.slotSelected);
+  const summaries = useSlotStore((s) => s.summaries);
+  const switchSlot = useSlotStore((s) => s.switchSlot);
+  const deleteSlot = useSlotStore((s) => s.deleteSlot);
+  const updateActiveSummary = useSlotStore((s) => s.updateActiveSummary);
+  const [migrationDone, setMigrationDone] = useState(false);
+
+  // レガシーデータ移行（初回起動時）
+  useEffect(() => {
+    migrateLegacyData().then(() => setMigrationDone(true));
+  }, []);
+
+  // Game loop & external data hooks (スロット選択後のみ有効)
   useGameLoop();
   useDailySync();
   const healthData = useHealthData();
@@ -55,12 +181,30 @@ export default function HomeScreen() {
   const addWp = useGameStore((s) => s.addWp);
   const lastWpRef = React.useRef(0);
   React.useEffect(() => {
+    if (!slotSelected) return;
     if (healthData.wp > lastWpRef.current) {
       const delta = healthData.wp - lastWpRef.current;
       addWp(delta);
       lastWpRef.current = healthData.wp;
     }
-  }, [healthData.wp, addWp]);
+  }, [healthData.wp, addWp, slotSelected]);
+
+  // スロットサマリーの同期（モンスター・フェーズ変更時）
+  useEffect(() => {
+    if (!slotSelected) return;
+    if (monster) {
+      updateActiveSummary({
+        monsterName: monster.name,
+        definitionId: monster.definitionId,
+        generation: monster.generation,
+        phase,
+      });
+    } else {
+      updateActiveSummary({ phase });
+    }
+  }, [monster?.name, monster?.definitionId, monster?.generation, phase, slotSelected, updateActiveSummary]);
+
+  const createNextGen = useMonsterStore((s) => s.createNextGen);
 
   const [menuIndex, setMenuIndex] = useState(0);
   const [showMeal, setShowMeal] = useState(false);
@@ -101,6 +245,31 @@ export default function HomeScreen() {
         break;
     }
   }, [menuIndex, showMeal, router]);
+
+  // 移行完了待ち
+  if (!migrationDone) {
+    return (
+      <View style={styles.container}>
+        <LcdFrame>
+          <View style={styles.newGame}>
+            <Text style={styles.lcdTitle}>DigiRide</Text>
+            <Text style={styles.lcdSub}>Loading...</Text>
+          </View>
+        </LcdFrame>
+      </View>
+    );
+  }
+
+  // セーブスロット選択画面
+  if (!slotSelected) {
+    return (
+      <SaveSelect
+        summaries={[...summaries]}
+        onSelect={(slot) => switchSlot(slot)}
+        onDelete={(slot) => deleteSlot(slot)}
+      />
+    );
+  }
 
   // New game screen
   if (phase === "new_game" || !monster) {
@@ -144,6 +313,77 @@ export default function HomeScreen() {
                 );
               })}
             </View>
+          </View>
+        </LcdFrame>
+      </View>
+    );
+  }
+
+  // Dead screen
+  if (phase === "dead" && monster) {
+    const deadMonsterDef = MONSTER_DEFINITIONS.get(monster.definitionId);
+    const daysLived = Math.floor(
+      (Date.now() - new Date(monster.bornAt).getTime()) / (1000 * 60 * 60 * 24)
+    );
+    const memory = monster.memoryEquipment;
+
+    return (
+      <View style={styles.container}>
+        <LcdFrame>
+          <View style={styles.deadScreen}>
+            <Text style={styles.deadTitle}>REST IN PEACE</Text>
+            <Text style={styles.deadMonsterName}>
+              {monster.name} (G{monster.generation})
+            </Text>
+            <Text style={styles.deadSub}>
+              {deadMonsterDef?.name ?? monster.definitionId} - {daysLived}日間
+            </Text>
+
+            {/* Final stats */}
+            <View style={styles.deadStatsBlock}>
+              <Text style={styles.deadStatsLine}>
+                HP:{monster.maxHp} ATK:{monster.atk} DEF:{monster.def}
+              </Text>
+              <Text style={styles.deadStatsLine}>
+                W:{monster.wins} L:{monster.losses}
+              </Text>
+            </View>
+
+            {/* Memory equipment preview */}
+            <View style={styles.deadMemoryBlock}>
+              <Text style={styles.deadMemoryTitle}>MEMORY EQUIPMENT</Text>
+              <Text style={styles.deadMemoryLine}>
+                HP+{Math.floor((monster.maxHp + (memory?.hp ?? 0)) * 0.2)}{" "}
+                ATK+{Math.floor((monster.atk + (memory?.atk ?? 0)) * 0.2)}{" "}
+                DEF+{Math.floor((monster.def + (memory?.def ?? 0)) * 0.2)}
+              </Text>
+            </View>
+
+            {/* Rebirth */}
+            <TextInput
+              style={styles.nameInput}
+              placeholder="新しい名前"
+              placeholderTextColor={LCD_COLORS.DOT_LIGHT}
+              value={nameInput}
+              onChangeText={setNameInput}
+              maxLength={8}
+            />
+            <Pressable
+              style={styles.rebirthButton}
+              onPress={() => {
+                if (!nameInput.trim()) return;
+                createNextGen(nameInput.trim());
+                const newMonster = useMonsterStore.getState().monster;
+                if (newMonster) {
+                  discover(newMonster.definitionId);
+                  resetForRebirth(newMonster.bornAt.split("T")[0]);
+                }
+                setNameInput("");
+                setPhase("alive");
+              }}
+            >
+              <Text style={styles.rebirthButtonText}>REBIRTH</Text>
+            </Pressable>
           </View>
         </LcdFrame>
       </View>
@@ -212,6 +452,9 @@ export default function HomeScreen() {
               tpM={tp.mid}
               tpH={tp.high}
               wp={wp}
+              encounterCount={encounterCount}
+              mealsToday={monster.mealsToday}
+              mealBonusRemaining={monster.mealBonusRemaining}
             />
 
             {/* Menu */}
@@ -302,5 +545,148 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontFamily: "monospace",
     marginTop: 4,
+  },
+  deadScreen: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 12,
+  },
+  deadTitle: {
+    color: LCD_COLORS.DOT_MID,
+    fontSize: 14,
+    fontWeight: "bold",
+    fontFamily: "monospace",
+    marginBottom: 4,
+  },
+  deadMonsterName: {
+    color: LCD_COLORS.DOT,
+    fontSize: 12,
+    fontWeight: "bold",
+    fontFamily: "monospace",
+  },
+  deadSub: {
+    color: LCD_COLORS.DOT_LIGHT,
+    fontSize: 9,
+    fontFamily: "monospace",
+    marginBottom: 6,
+  },
+  deadStatsBlock: {
+    alignItems: "center",
+    marginBottom: 6,
+  },
+  deadStatsLine: {
+    color: LCD_COLORS.DOT,
+    fontSize: 9,
+    fontFamily: "monospace",
+  },
+  deadMemoryBlock: {
+    alignItems: "center",
+    marginBottom: 10,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderWidth: 1,
+    borderColor: LCD_COLORS.DOT_MID,
+  },
+  deadMemoryTitle: {
+    color: LCD_COLORS.DOT_LIGHT,
+    fontSize: 8,
+    fontFamily: "monospace",
+    marginBottom: 2,
+  },
+  deadMemoryLine: {
+    color: LCD_COLORS.DOT,
+    fontSize: 9,
+    fontWeight: "bold",
+    fontFamily: "monospace",
+  },
+  rebirthButton: {
+    backgroundColor: LCD_COLORS.DOT_MID,
+    paddingVertical: 6,
+    paddingHorizontal: 20,
+    marginTop: 8,
+  },
+  rebirthButtonText: {
+    color: LCD_COLORS.BG,
+    fontSize: 11,
+    fontWeight: "bold",
+    fontFamily: "monospace",
+  },
+  // SaveSelect styles
+  saveSelectContent: {
+    flex: 1,
+    padding: 12,
+  },
+  saveSelectTitle: {
+    color: LCD_COLORS.DOT,
+    fontSize: 14,
+    fontWeight: "bold",
+    fontFamily: "monospace",
+    textAlign: "center",
+    marginBottom: 12,
+  },
+  slotList: {
+    flex: 1,
+    gap: 6,
+  },
+  slotItem: {
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+  },
+  slotItemSelected: {
+    backgroundColor: LCD_COLORS.DOT_MID,
+  },
+  slotHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  slotCursor: {
+    color: LCD_COLORS.DOT,
+    fontSize: 10,
+    fontFamily: "monospace",
+    width: 12,
+  },
+  slotLabel: {
+    color: LCD_COLORS.DOT,
+    fontSize: 11,
+    fontWeight: "bold",
+    fontFamily: "monospace",
+  },
+  slotInfo: {
+    paddingLeft: 16,
+  },
+  slotMonsterName: {
+    color: LCD_COLORS.DOT,
+    fontSize: 10,
+    fontFamily: "monospace",
+  },
+  slotDetail: {
+    color: LCD_COLORS.DOT_LIGHT,
+    fontSize: 8,
+    fontFamily: "monospace",
+  },
+  slotEmpty: {
+    color: LCD_COLORS.DOT_LIGHT,
+    fontSize: 10,
+    fontFamily: "monospace",
+    paddingLeft: 16,
+  },
+  deleteConfirm: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  deleteConfirmText: {
+    color: LCD_COLORS.DOT,
+    fontSize: 12,
+    fontWeight: "bold",
+    fontFamily: "monospace",
+    marginBottom: 8,
+  },
+  deleteConfirmSub: {
+    color: LCD_COLORS.DOT_LIGHT,
+    fontSize: 9,
+    fontFamily: "monospace",
   },
 });

@@ -30,6 +30,7 @@ function createTestMonster(overrides?: Partial<MonsterState>): MonsterState {
     memoryEquipment: null,
     mealsToday: 0,
     mealsYesterday: 2,
+    mealBonusRemaining: 0,
     lastLoginAt: new Date().toISOString(),
     wins: 10,
     losses: 3,

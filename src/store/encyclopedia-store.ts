@@ -7,7 +7,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { zustandStorage } from "./storage";
+import { slotStorage } from "./storage";
 
 /** 世代履歴の1レコード */
 export interface GenerationRecord {
@@ -103,7 +103,7 @@ export const useEncyclopediaStore = create<
     }),
     {
       name: "digiride-encyclopedia",
-      storage: zustandStorage,
+      storage: slotStorage,
     }
   )
 );

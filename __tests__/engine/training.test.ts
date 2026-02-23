@@ -33,6 +33,7 @@ function createTestMonster(overrides?: Partial<MonsterState>): MonsterState {
     memoryEquipment: null,
     mealsToday: 0,
     mealsYesterday: 0,
+    mealBonusRemaining: 0,
     lastLoginAt: new Date().toISOString(),
     wins: 0,
     losses: 0,
@@ -45,7 +46,7 @@ describe("Training Engine", () => {
     const lsd = TRAINING_MENU_MAP.get("lsd")!;
 
     it("should return true when enough TP available", () => {
-      expect(canExecuteTraining(lsd, { low: 15, mid: 3, high: 0 })).toBe(true);
+      expect(canExecuteTraining(lsd, { low: 42, mid: 8, high: 0 })).toBe(true);
     });
 
     it("should return true with excess TP", () => {
@@ -53,11 +54,11 @@ describe("Training Engine", () => {
     });
 
     it("should return false when TP-L insufficient", () => {
-      expect(canExecuteTraining(lsd, { low: 14, mid: 3, high: 0 })).toBe(false);
+      expect(canExecuteTraining(lsd, { low: 41, mid: 8, high: 0 })).toBe(false);
     });
 
     it("should return false when TP-M insufficient", () => {
-      expect(canExecuteTraining(lsd, { low: 15, mid: 2, high: 0 })).toBe(false);
+      expect(canExecuteTraining(lsd, { low: 42, mid: 7, high: 0 })).toBe(false);
     });
   });
 
@@ -66,7 +67,7 @@ describe("Training Engine", () => {
 
     it("should return min gains with rng=0", () => {
       const result = executeTraining(lsd, false, fixedRng(0));
-      expect(result.hpGain).toBe(8);
+      expect(result.hpGain).toBe(5);
       expect(result.atkGain).toBe(0);
       expect(result.defGain).toBe(1);
       expect(result.mealBonusApplied).toBe(false);
@@ -74,16 +75,16 @@ describe("Training Engine", () => {
 
     it("should return max gains with rng=0.999", () => {
       const result = executeTraining(lsd, false, fixedRng(0.999));
-      expect(result.hpGain).toBe(12);
+      expect(result.hpGain).toBe(6);
       expect(result.atkGain).toBe(1);
-      expect(result.defGain).toBe(3);
+      expect(result.defGain).toBe(2);
     });
 
     it("should apply meal bonus ×1.1 with ceil", () => {
-      // With rng=0: HP=8, ATK=0, DEF=1
-      // After ×1.1: HP=ceil(8.8)=9, ATK=ceil(0)=0, DEF=ceil(1.1)=2
+      // With rng=0: HP=5, ATK=0, DEF=1
+      // After ×1.1: HP=ceil(5.5)=6, ATK=ceil(0)=0, DEF=ceil(1.1)=2
       const result = executeTraining(lsd, true, fixedRng(0));
-      expect(result.hpGain).toBe(9);
+      expect(result.hpGain).toBe(6);
       expect(result.atkGain).toBe(0);
       expect(result.defGain).toBe(2);
       expect(result.mealBonusApplied).toBe(true);
@@ -105,8 +106,8 @@ describe("Training Engine", () => {
       applyTrainingResult(monster, result, lsd);
 
       expect(monster.maxHp).toBeGreaterThan(65);
-      expect(monster.totalTpL).toBe(15);
-      expect(monster.totalTpM).toBe(3);
+      expect(monster.totalTpL).toBe(42);
+      expect(monster.totalTpM).toBe(8);
       expect(monster.totalTpH).toBe(0);
     });
 

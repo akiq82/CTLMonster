@@ -6,7 +6,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { zustandStorage } from "./storage";
+import { globalStorage } from "./storage";
 
 interface SettingsState {
   /** サウンド有効 */
@@ -73,7 +73,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
     }),
     {
       name: "digiride-settings",
-      storage: zustandStorage,
+      storage: globalStorage,
     }
   )
 );

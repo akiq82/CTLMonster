@@ -28,10 +28,10 @@ describe("Training Menu Definitions", () => {
     }
   });
 
-  it("each menu should have at least some TP cost", () => {
+  it("each menu should cost exactly 50 TP total", () => {
     for (const menu of TRAINING_MENUS) {
       const total = menu.costTpL + menu.costTpM + menu.costTpH;
-      expect(total).toBeGreaterThan(0);
+      expect(total).toBe(50);
     }
   });
 
@@ -43,85 +43,85 @@ describe("Training Menu Definitions", () => {
     }
   });
 
-  describe("GDD 5.4 values verification", () => {
-    it("LSD: TP-L=15, TP-M=3, TP-H=0, HP+8~12, ATK+0~1, DEF+1~3", () => {
+  describe("Stat gain values verification (normalized 50TP, proportional gains)", () => {
+    it("LSD: TP-L=42, TP-M=8, TP-H=0, HP+5~6, ATK+0~1, DEF+1~2", () => {
       const menu = TRAINING_MENU_MAP.get("lsd")!;
-      expect(menu.costTpL).toBe(15);
-      expect(menu.costTpM).toBe(3);
+      expect(menu.costTpL).toBe(42);
+      expect(menu.costTpM).toBe(8);
       expect(menu.costTpH).toBe(0);
-      expect(menu.hpGain).toEqual({ min: 8, max: 12 });
+      expect(menu.hpGain).toEqual({ min: 5, max: 6 });
       expect(menu.atkGain).toEqual({ min: 0, max: 1 });
-      expect(menu.defGain).toEqual({ min: 1, max: 3 });
+      expect(menu.defGain).toEqual({ min: 1, max: 2 });
     });
 
-    it("Endurance: TP-L=10, TP-M=5, TP-H=0, HP+5~8, ATK+1~2, DEF+2~4", () => {
+    it("Endurance: TP-L=33, TP-M=17, TP-H=0, HP+3~6, ATK+1~1, DEF+1~2", () => {
       const menu = TRAINING_MENU_MAP.get("endurance")!;
-      expect(menu.costTpL).toBe(10);
-      expect(menu.costTpM).toBe(5);
+      expect(menu.costTpL).toBe(33);
+      expect(menu.costTpM).toBe(17);
       expect(menu.costTpH).toBe(0);
-      expect(menu.hpGain).toEqual({ min: 5, max: 8 });
+      expect(menu.hpGain).toEqual({ min: 3, max: 6 });
+      expect(menu.atkGain).toEqual({ min: 1, max: 1 });
+      expect(menu.defGain).toEqual({ min: 1, max: 2 });
+    });
+
+    it("Tempo: TP-L=15, TP-M=35, TP-H=0, HP+1~2, ATK+1~2, DEF+3~5", () => {
+      const menu = TRAINING_MENU_MAP.get("tempo")!;
+      expect(menu.costTpL).toBe(15);
+      expect(menu.costTpM).toBe(35);
+      expect(menu.costTpH).toBe(0);
+      expect(menu.hpGain).toEqual({ min: 1, max: 2 });
+      expect(menu.atkGain).toEqual({ min: 1, max: 2 });
+      expect(menu.defGain).toEqual({ min: 3, max: 5 });
+    });
+
+    it("Sweet Spot: TP-L=9, TP-M=31, TP-H=10, HP+1~2, ATK+1~2, DEF+2~4", () => {
+      const menu = TRAINING_MENU_MAP.get("sweet-spot")!;
+      expect(menu.costTpL).toBe(9);
+      expect(menu.costTpM).toBe(31);
+      expect(menu.costTpH).toBe(10);
+      expect(menu.hpGain).toEqual({ min: 1, max: 2 });
       expect(menu.atkGain).toEqual({ min: 1, max: 2 });
       expect(menu.defGain).toEqual({ min: 2, max: 4 });
     });
 
-    it("Tempo: TP-L=5, TP-M=12, TP-H=0, HP+2~4, ATK+1~3, DEF+5~8", () => {
-      const menu = TRAINING_MENU_MAP.get("tempo")!;
-      expect(menu.costTpL).toBe(5);
-      expect(menu.costTpM).toBe(12);
-      expect(menu.costTpH).toBe(0);
-      expect(menu.hpGain).toEqual({ min: 2, max: 4 });
-      expect(menu.atkGain).toEqual({ min: 1, max: 3 });
-      expect(menu.defGain).toEqual({ min: 5, max: 8 });
-    });
-
-    it("Sweet Spot: TP-L=3, TP-M=10, TP-H=3, HP+2~3, ATK+2~4, DEF+4~7", () => {
-      const menu = TRAINING_MENU_MAP.get("sweet-spot")!;
-      expect(menu.costTpL).toBe(3);
-      expect(menu.costTpM).toBe(10);
-      expect(menu.costTpH).toBe(3);
-      expect(menu.hpGain).toEqual({ min: 2, max: 3 });
-      expect(menu.atkGain).toEqual({ min: 2, max: 4 });
-      expect(menu.defGain).toEqual({ min: 4, max: 7 });
-    });
-
-    it("VO2max Intervals: TP-L=0, TP-M=5, TP-H=12, HP+1~2, ATK+6~10, DEF+1~3", () => {
+    it("VO2max Intervals: TP-L=0, TP-M=15, TP-H=35, HP+1~1, ATK+4~6, DEF+1~2", () => {
       const menu = TRAINING_MENU_MAP.get("vo2max-interval")!;
       expect(menu.costTpL).toBe(0);
-      expect(menu.costTpM).toBe(5);
-      expect(menu.costTpH).toBe(12);
-      expect(menu.hpGain).toEqual({ min: 1, max: 2 });
-      expect(menu.atkGain).toEqual({ min: 6, max: 10 });
-      expect(menu.defGain).toEqual({ min: 1, max: 3 });
+      expect(menu.costTpM).toBe(15);
+      expect(menu.costTpH).toBe(35);
+      expect(menu.hpGain).toEqual({ min: 1, max: 1 });
+      expect(menu.atkGain).toEqual({ min: 4, max: 6 });
+      expect(menu.defGain).toEqual({ min: 1, max: 2 });
     });
 
-    it("Anaerobic Sprint: TP-L=0, TP-M=2, TP-H=15, HP+0~1, ATK+8~12, DEF+0~1", () => {
+    it("Anaerobic Sprint: TP-L=0, TP-M=6, TP-H=44, HP+0~1, ATK+5~7, DEF+0~1", () => {
       const menu = TRAINING_MENU_MAP.get("anaerobic-sprint")!;
       expect(menu.costTpL).toBe(0);
-      expect(menu.costTpM).toBe(2);
-      expect(menu.costTpH).toBe(15);
+      expect(menu.costTpM).toBe(6);
+      expect(menu.costTpH).toBe(44);
       expect(menu.hpGain).toEqual({ min: 0, max: 1 });
-      expect(menu.atkGain).toEqual({ min: 8, max: 12 });
+      expect(menu.atkGain).toEqual({ min: 5, max: 7 });
       expect(menu.defGain).toEqual({ min: 0, max: 1 });
     });
 
-    it("Hill Climb: TP-L=5, TP-M=8, TP-H=5, HP+3~5, ATK+3~5, DEF+3~5", () => {
+    it("Hill Climb: TP-L=14, TP-M=22, TP-H=14, HP+2~3, ATK+2~3, DEF+2~3", () => {
       const menu = TRAINING_MENU_MAP.get("hill-climb")!;
-      expect(menu.costTpL).toBe(5);
-      expect(menu.costTpM).toBe(8);
-      expect(menu.costTpH).toBe(5);
-      expect(menu.hpGain).toEqual({ min: 3, max: 5 });
-      expect(menu.atkGain).toEqual({ min: 3, max: 5 });
-      expect(menu.defGain).toEqual({ min: 3, max: 5 });
+      expect(menu.costTpL).toBe(14);
+      expect(menu.costTpM).toBe(22);
+      expect(menu.costTpH).toBe(14);
+      expect(menu.hpGain).toEqual({ min: 2, max: 3 });
+      expect(menu.atkGain).toEqual({ min: 2, max: 3 });
+      expect(menu.defGain).toEqual({ min: 2, max: 3 });
     });
 
-    it("Race Skills: TP-L=3, TP-M=5, TP-H=8, HP+1~3, ATK+5~8, DEF+2~4", () => {
+    it("Race Skills: TP-L=9, TP-M=16, TP-H=25, HP+1~2, ATK+3~5, DEF+1~2", () => {
       const menu = TRAINING_MENU_MAP.get("race-skills")!;
-      expect(menu.costTpL).toBe(3);
-      expect(menu.costTpM).toBe(5);
-      expect(menu.costTpH).toBe(8);
-      expect(menu.hpGain).toEqual({ min: 1, max: 3 });
-      expect(menu.atkGain).toEqual({ min: 5, max: 8 });
-      expect(menu.defGain).toEqual({ min: 2, max: 4 });
+      expect(menu.costTpL).toBe(9);
+      expect(menu.costTpM).toBe(16);
+      expect(menu.costTpH).toBe(25);
+      expect(menu.hpGain).toEqual({ min: 1, max: 2 });
+      expect(menu.atkGain).toEqual({ min: 3, max: 5 });
+      expect(menu.defGain).toEqual({ min: 1, max: 2 });
     });
   });
 

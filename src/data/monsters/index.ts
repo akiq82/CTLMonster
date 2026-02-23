@@ -126,7 +126,7 @@ export const STAGE_STAT_TABLE = {
  */
 export const EVOLUTION_REQUIREMENTS = {
   [EvolutionStage.BABY_I]: { hp: 20, atk: 6, def: 5, bossWorld: null },
-  [EvolutionStage.BABY_II]: { hp: 50, atk: 18, def: 14, bossWorld: 1 },
+  [EvolutionStage.BABY_II]: { hp: 40, atk: 16, def: 12, bossWorld: 1 },
   [EvolutionStage.ROOKIE]: { hp: 130, atk: 40, def: 30, bossWorld: 2 },
   [EvolutionStage.CHAMPION]: { hp: 350, atk: 95, def: 75, bossWorld: 4 },
   [EvolutionStage.ULTIMATE]: { hp: 800, atk: 220, def: 180, bossWorld: 6 },

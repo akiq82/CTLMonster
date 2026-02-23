@@ -45,9 +45,9 @@ describe("World Engine", () => {
   });
 
   describe("canChallengeBoss", () => {
-    it("should require 15 kills and boss not yet defeated", () => {
-      expect(canChallengeBoss({ worldNumber: 1, killCount: 14, bossDefeated: false })).toBe(false);
-      expect(canChallengeBoss({ worldNumber: 1, killCount: 15, bossDefeated: false })).toBe(true);
+    it("should require 10 kills and boss not yet defeated", () => {
+      expect(canChallengeBoss({ worldNumber: 1, killCount: 9, bossDefeated: false })).toBe(false);
+      expect(canChallengeBoss({ worldNumber: 1, killCount: 10, bossDefeated: false })).toBe(true);
     });
 
     it("should return false if boss already defeated", () => {
@@ -110,7 +110,7 @@ describe("World Engine", () => {
     });
 
     it("halfway through mobs → ~50%", () => {
-      const rate = getWorldProgressRate({ worldNumber: 1, killCount: 8, bossDefeated: false });
+      const rate = getWorldProgressRate({ worldNumber: 1, killCount: 5, bossDefeated: false });
       expect(rate).toBeCloseTo(0.5, 1);
     });
   });

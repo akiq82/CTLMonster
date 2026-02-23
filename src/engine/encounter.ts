@@ -3,16 +3,16 @@
  *
  * GDD.md セクション3.2, 7.1 に基づく。
  *
- * - エンカウント1回 = 3,000 WP消費
- * - ボス戦 = 5,000 WP消費
- * - エンカウント成功率 = 80%（20%で空振り: WPは消費するがバトルなし）
- * - ボス到達条件: 15体のモブ撃破
+ * - エンカウント1回 = 2,000 WP消費（確定バトル、空振りなし）
+ * - ボス戦 = 3,000 WP消費
+ * - ボス到達条件: 10体のモブ撃破
+ * - ライドWP: 1km = 250WP, 獲得標高1m = 10WP
  */
 
 import { WP_CONSTANTS } from "../types/battle";
 import type { WorldDefinition, EnemyDefinition } from "../types/world";
 import type { BattleFighter } from "../types/battle";
-import { chance, randomPick, randomInt, type RngFn } from "../utils/random";
+import { randomPick, randomInt, type RngFn } from "../utils/random";
 
 /**
  * エンカウント可能かどうか（WPが足りるか）
@@ -31,22 +31,6 @@ export function canEncounter(currentWp: number, isBoss: boolean): boolean {
  */
 export function getEncounterCost(isBoss: boolean): number {
   return isBoss ? WP_CONSTANTS.BOSS_WP_COST : WP_CONSTANTS.ENCOUNTER_WP_COST;
-}
-
-/**
- * エンカウント成功判定（80%成功 / 20%空振り）
- * ボス戦は常に成功。
- *
- * @param isBoss - ボス戦かどうか
- * @param rng - 乱数生成関数
- * @returns エンカウント成功ならtrue
- */
-export function rollEncounter(
-  isBoss: boolean,
-  rng: RngFn = Math.random
-): boolean {
-  if (isBoss) return true;
-  return chance(WP_CONSTANTS.ENCOUNTER_SUCCESS_RATE, rng);
 }
 
 /**
@@ -92,6 +76,31 @@ export function generateBoss(world: WorldDefinition): BattleFighter {
   };
 }
 
+/** WP→エンカウント変換の結果 */
+export interface WpConversionResult {
+  /** 獲得したエンカウント回数（確定バトル） */
+  encountersGained: number;
+  /** 変換後の残余WP（2000未満の端数） */
+  wpRemaining: number;
+}
+
+/**
+ * WPをエンカウント回数に変換する。
+ *
+ * 2000 WPごとに1回の確定バトル（空振りなし）。
+ *
+ * @param currentWp - 現在のWP
+ * @returns 変換結果（エンカウント数、残余WP）
+ */
+export function convertWpToEncounters(
+  currentWp: number
+): WpConversionResult {
+  const encountersGained = Math.floor(currentWp / WP_CONSTANTS.ENCOUNTER_WP_COST);
+  const wpRemaining = currentWp % WP_CONSTANTS.ENCOUNTER_WP_COST;
+
+  return { encountersGained, wpRemaining };
+}
+
 /**
  * ボス戦に挑戦可能か（必要撃破数を満たしているか）
  *
@@ -104,4 +113,20 @@ export function canChallengeBoss(
   requiredKills: number
 ): boolean {
   return killCount >= requiredKills;
+}
+
+/**
+ * ライドデータからWPを計算する
+ *
+ * @param distanceKm - 走行距離 (km)
+ * @param elevationGainM - 獲得標高 (meters)
+ * @returns 獲得WP
+ */
+export function calculateRideWp(
+  distanceKm: number,
+  elevationGainM: number
+): number {
+  const distanceWp = Math.floor(distanceKm * WP_CONSTANTS.WP_PER_RIDE_KM);
+  const elevationWp = Math.floor(elevationGainM * WP_CONSTANTS.WP_PER_RIDE_ELEVATION_M);
+  return distanceWp + elevationWp;
 }

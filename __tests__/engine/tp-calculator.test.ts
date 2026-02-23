@@ -35,7 +35,6 @@ describe("TP Calculator", () => {
         z7: 0,
       };
       const result = calculatePseudoTssByIntensity(zoneTime);
-      // Only Z1 has time, so only low should have a value
       expect(result.low).toBeGreaterThan(0);
       expect(result.mid).toBe(0);
       expect(result.high).toBe(0);
@@ -74,26 +73,15 @@ describe("TP Calculator", () => {
     });
   });
 
-  describe("calculateWorkoutTp - GDD concrete examples", () => {
+  describe("calculateWorkoutTp - TSS=TP with zone ratio distribution", () => {
     /**
-     * GDD 2/14 インターバルセッション (TSS=230, IF=0.84)
+     * 2/14 インターバルセッション (TSS=230)
      *
-     * | Zone | Seconds | IF   | pseudo-TSS |
-     * |------|---------|------|------------|
-     * | Z1   | 3616    | 0.55 | 30.4       |
-     * | Z2   | 3443    | 0.75 | 53.8       |
-     * | Z3   | 1548    | 0.90 | 34.8       |
-     * | Z4   | 1653    | 1.00 | 45.9       |
-     * | Z5   | 705     | 1.10 | 23.7       |
-     * | Z6   | 777     | 1.20 | 31.1       |
-     * | Z7   | 66      | 1.30 | 3.1        |
-     *
-     * TP-L = floor(84.2 × 0.6) = 50
-     * TP-M = floor(80.7 × 0.8) = 64
-     * TP-H = floor(57.9 × 1.0) = 57
-     * Total = 171
+     * 擬似TSS: L≈84.2, M≈80.7, H≈57.9 → 合計≈222.8
+     * 比率:    L=37.8%, M=36.2%, H=26.0%
+     * TP:      L=floor(230×0.378)=86, M=floor(230×0.362)=83, H=floor(230×0.260)=59
      */
-    it("2/14 interval session: TP-L=50, TP-M=64, TP-H=57 (total 171)", () => {
+    it("2/14 interval (TSS=230): zone ratio distribution", () => {
       const zoneTime: ZoneTime = {
         z1: 3616,
         z2: 3443,
@@ -104,41 +92,24 @@ describe("TP Calculator", () => {
         z7: 66,
       };
 
-      const result = calculateWorkoutTp(zoneTime);
+      const result = calculateWorkoutTp(zoneTime, 230);
 
-      expect(result.low).toBe(50);
-      expect(result.mid).toBe(64);
-      expect(result.high).toBe(57);
-      expect(result.low + result.mid + result.high).toBe(171);
+      expect(result.low).toBe(86);
+      expect(result.mid).toBe(83);
+      expect(result.high).toBe(59);
+      // 合計はTSSに近い (floorの切り捨てで若干少なくなる)
+      expect(result.low + result.mid + result.high).toBeLessThanOrEqual(230);
+      expect(result.low + result.mid + result.high).toBeGreaterThanOrEqual(225);
     });
 
     /**
-     * GDD 2/17 VO2 30-30セッション (TSS=43, IF=0.91)
+     * 2/17 VO2 30-30セッション (TSS=43)
      *
-     * TP-L = floor(25.2 × 0.6) = 15
-     * TP-M = floor(0.8 × 0.8) = 0
-     * TP-H = floor(45.5 × 1.0) = 45
-     * Total = 60
+     * 擬似TSS: L≈25.2, M≈0.8, H≈45.5 → 合計≈71.5
+     * 比率:    L=35.2%, M=1.1%, H=63.6%
+     * TP:      L=floor(43×0.352)=15, M=floor(43×0.011)=0, H=floor(43×0.636)=27
      */
-    it("2/17 VO2 30-30 session: TP-L=15, TP-M=0, TP-H=45 (total 60)", () => {
-      // We need to reverse-engineer zone times from pseudo-TSS values
-      // TP-L: pseudo-TSS 25.2 → need Z1+Z2 seconds
-      // TP-M: pseudo-TSS 0.8 → need Z3+Z4 seconds
-      // TP-H: pseudo-TSS 45.5 → need Z5+Z6+Z7 seconds
-      //
-      // Use specific zone times that produce the GDD's pseudo-TSS values.
-      // From the GDD context, this is a VO2 session so most time is in Z1 (warmup) + Z5-Z7.
-      //
-      // Z1: pseudo-TSS ≈ 20 → seconds = 20 / (0.55² × 100) × 3600 = 20/30.25 × 3600 ≈ 2380
-      // Z2: pseudo-TSS ≈ 5.2 → seconds = 5.2 / (0.75² × 100) × 3600 = 5.2/56.25 × 3600 ≈ 333
-      // Z3: pseudo-TSS ≈ 0.8 → seconds = 0.8 / (0.90² × 100) × 3600 = 0.8/81 × 3600 ≈ 36
-      // Z4: pseudo-TSS ≈ 0 → 0 seconds
-      // Z5: pseudo-TSS ≈ 30 → seconds = 30 / (1.10² × 100) × 3600 = 30/121 × 3600 ≈ 893
-      // Z6: pseudo-TSS ≈ 10 → seconds = 10 / (1.20² × 100) × 3600 = 10/144 × 3600 ≈ 250
-      // Z7: pseudo-TSS ≈ 5.5 → seconds = 5.5 / (1.30² × 100) × 3600 = 5.5/169 × 3600 ≈ 117
-
-      // Verify by computing: we need exact values that produce floor results of 15, 0, 45
-      // Let's pick values that give us the GDD's pseudo-TSS totals
+    it("2/17 VO2 30-30 (TSS=43): high-intensity dominant", () => {
       const zoneTime: ZoneTime = {
         z1: 2380,
         z2: 333,
@@ -150,36 +121,25 @@ describe("TP Calculator", () => {
       };
 
       const pseudoTss = calculatePseudoTssByIntensity(zoneTime);
-
-      // Verify pseudo-TSS are in the right ballpark
       expect(pseudoTss.low).toBeCloseTo(25.2, 0);
       expect(pseudoTss.mid).toBeCloseTo(0.8, 0);
       expect(pseudoTss.high).toBeCloseTo(45.5, 0);
 
-      const result = calculateWorkoutTp(zoneTime);
+      const result = calculateWorkoutTp(zoneTime, 43);
       expect(result.low).toBe(15);
       expect(result.mid).toBe(0);
-      expect(result.high).toBe(45);
-      expect(result.low + result.mid + result.high).toBe(60);
+      expect(result.high).toBe(27);
+      expect(result.low + result.mid + result.high).toBeLessThanOrEqual(43);
     });
 
     /**
-     * GDD 2/21 60kmエンデュランス (TSS=97, IF=0.64)
+     * 2/21 60kmエンデュランス (TSS=97)
      *
-     * TP-L = floor(90.5 × 0.6) = 54
-     * TP-M = floor(21.7 × 0.8) = 17
-     * TP-H = floor(1.8 × 1.0) = 1
-     * Total = 72
+     * 擬似TSS: L≈90.5, M≈21.7, H≈1.8 → 合計≈114.0
+     * 比率:    L=79.4%, M=19.0%, H=1.6%
+     * TP:      L=floor(97×0.794)=76, M=floor(97×0.190)=18, H=floor(97×0.016)=1
      */
-    it("2/21 60km endurance: TP-L=54, TP-M=17, TP-H=1 (total 72)", () => {
-      // Endurance ride: mostly Z1-Z2 with some Z3
-      // Z1: pseudo-TSS ≈ 55 → seconds = 55 / 30.25 × 3600 ≈ 6545
-      // Z2: pseudo-TSS ≈ 35.5 → seconds = 35.5 / 56.25 × 3600 ≈ 2272
-      // Z3: pseudo-TSS ≈ 18 → seconds = 18 / 81 × 3600 ≈ 800
-      // Z4: pseudo-TSS ≈ 3.7 → seconds = 3.7 / 100 × 3600 = 133
-      // Z5: pseudo-TSS ≈ 1.8 → seconds = 1.8 / 121 × 3600 ≈ 54
-      // Z6: 0
-      // Z7: 0
+    it("2/21 60km endurance (TSS=97): low-intensity dominant", () => {
       const zoneTime: ZoneTime = {
         z1: 6545,
         z2: 2272,
@@ -191,16 +151,35 @@ describe("TP Calculator", () => {
       };
 
       const pseudoTss = calculatePseudoTssByIntensity(zoneTime);
-
       expect(pseudoTss.low).toBeCloseTo(90.5, 0);
       expect(pseudoTss.mid).toBeCloseTo(21.7, 0);
       expect(pseudoTss.high).toBeCloseTo(1.8, 0);
 
-      const result = calculateWorkoutTp(zoneTime);
-      expect(result.low).toBe(54);
-      expect(result.mid).toBe(17);
+      const result = calculateWorkoutTp(zoneTime, 97);
+      expect(result.low).toBe(76);
+      expect(result.mid).toBe(18);
       expect(result.high).toBe(1);
-      expect(result.low + result.mid + result.high).toBe(72);
+      expect(result.low + result.mid + result.high).toBeLessThanOrEqual(97);
+    });
+
+    it("TSS=TP: total TP should approximate actual TSS", () => {
+      // エンデュランス: TSS=97 → TP合計 95 (≈97)
+      const endurance: ZoneTime = {
+        z1: 6545, z2: 2272, z3: 800, z4: 133, z5: 54, z6: 0, z7: 0,
+      };
+      const endResult = calculateWorkoutTp(endurance, 97);
+      const endTotal = endResult.low + endResult.mid + endResult.high;
+      expect(endTotal).toBeGreaterThanOrEqual(93);
+      expect(endTotal).toBeLessThanOrEqual(97);
+
+      // インターバル: TSS=230 → TP合計 228 (≈230)
+      const interval: ZoneTime = {
+        z1: 3616, z2: 3443, z3: 1548, z4: 1653, z5: 705, z6: 777, z7: 66,
+      };
+      const intResult = calculateWorkoutTp(interval, 230);
+      const intTotal = intResult.low + intResult.mid + intResult.high;
+      expect(intTotal).toBeGreaterThanOrEqual(225);
+      expect(intTotal).toBeLessThanOrEqual(230);
     });
   });
 
@@ -209,7 +188,17 @@ describe("TP Calculator", () => {
       const zoneTime: ZoneTime = {
         z1: 0, z2: 0, z3: 0, z4: 0, z5: 0, z6: 0, z7: 0,
       };
-      const result = calculateWorkoutTp(zoneTime);
+      const result = calculateWorkoutTp(zoneTime, 100);
+      expect(result.low).toBe(0);
+      expect(result.mid).toBe(0);
+      expect(result.high).toBe(0);
+    });
+
+    it("TSS=0 should return zero TP", () => {
+      const zoneTime: ZoneTime = {
+        z1: 3600, z2: 0, z3: 0, z4: 0, z5: 0, z6: 0, z7: 0,
+      };
+      const result = calculateWorkoutTp(zoneTime, 0);
       expect(result.low).toBe(0);
       expect(result.mid).toBe(0);
       expect(result.high).toBe(0);
@@ -219,7 +208,7 @@ describe("TP Calculator", () => {
       const zoneTime: ZoneTime = {
         z1: 100, z2: 200, z3: 50, z4: 30, z5: 10, z6: 5, z7: 1,
       };
-      const result = calculateWorkoutTp(zoneTime);
+      const result = calculateWorkoutTp(zoneTime, 50);
       expect(result.low).toBeGreaterThanOrEqual(0);
       expect(result.mid).toBeGreaterThanOrEqual(0);
       expect(result.high).toBeGreaterThanOrEqual(0);
@@ -229,13 +218,26 @@ describe("TP Calculator", () => {
     });
 
     it("should use floor rounding (not round or ceil)", () => {
-      // 1 hour Z1: pseudo-TSS = 0.55² × 100 = 30.25
-      // TP-L = floor(30.25 × 0.6) = floor(18.15) = 18
+      // Z1 only: pseudo-TSS = 30.25, ratio = 100% low
+      // TSS=30 → L = floor(30 × 1.0) = 30
       const zoneTime: ZoneTime = {
         z1: 3600, z2: 0, z3: 0, z4: 0, z5: 0, z6: 0, z7: 0,
       };
-      const result = calculateWorkoutTp(zoneTime);
-      expect(result.low).toBe(18);
+      const result = calculateWorkoutTp(zoneTime, 30);
+      expect(result.low).toBe(30);
+      expect(result.mid).toBe(0);
+      expect(result.high).toBe(0);
+    });
+
+    it("single zone with TSS should get all TP in that category", () => {
+      // Z4 only → all mid
+      const zoneTime: ZoneTime = {
+        z1: 0, z2: 0, z3: 0, z4: 3600, z5: 0, z6: 0, z7: 0,
+      };
+      const result = calculateWorkoutTp(zoneTime, 100);
+      expect(result.low).toBe(0);
+      expect(result.mid).toBe(100);
+      expect(result.high).toBe(0);
     });
   });
 });

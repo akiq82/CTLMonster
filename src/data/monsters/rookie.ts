@@ -17,7 +17,7 @@ const agumon: MonsterDefinition = {
   stage: EvolutionStage.ROOKIE,
   baseStats: { hp: 65, atk: 20, def: 15 },
   statCaps: { hp: 200, atk: 60, def: 50 },
-  evolutionRequirement: { hp: 50, atk: 18, def: 14, bossWorld: 1 },
+  evolutionRequirement: { hp: 40, atk: 16, def: 12, bossWorld: 1 },
   evolutionPaths: [
     { targetId: "greymon", branchType: BranchType.HP },
     { targetId: "greymon", branchType: BranchType.BALANCED },
@@ -35,7 +35,7 @@ const gabumon: MonsterDefinition = {
   stage: EvolutionStage.ROOKIE,
   baseStats: { hp: 60, atk: 18, def: 18 },
   statCaps: { hp: 200, atk: 55, def: 55 },
-  evolutionRequirement: { hp: 50, atk: 18, def: 14, bossWorld: 1 },
+  evolutionRequirement: { hp: 40, atk: 16, def: 12, bossWorld: 1 },
   evolutionPaths: [
     { targetId: "garurumon", branchType: BranchType.DEF },
     { targetId: "garurumon", branchType: BranchType.BALANCED },
@@ -52,7 +52,7 @@ const guilmon: MonsterDefinition = {
   stage: EvolutionStage.ROOKIE,
   baseStats: { hp: 55, atk: 24, def: 13 },
   statCaps: { hp: 180, atk: 65, def: 45 },
-  evolutionRequirement: { hp: 50, atk: 18, def: 14, bossWorld: 1 },
+  evolutionRequirement: { hp: 40, atk: 16, def: 12, bossWorld: 1 },
   evolutionPaths: [
     { targetId: "growlmon", branchType: BranchType.ATK },
     { targetId: "growlmon", branchType: BranchType.BALANCED },
@@ -69,7 +69,7 @@ const patamon: MonsterDefinition = {
   stage: EvolutionStage.ROOKIE,
   baseStats: { hp: 70, atk: 16, def: 16 },
   statCaps: { hp: 220, atk: 50, def: 50 },
-  evolutionRequirement: { hp: 50, atk: 18, def: 14, bossWorld: 1 },
+  evolutionRequirement: { hp: 40, atk: 16, def: 12, bossWorld: 1 },
   evolutionPaths: [
     { targetId: "angemon", branchType: BranchType.HP },
     { targetId: "angemon", branchType: BranchType.BALANCED },
@@ -86,7 +86,7 @@ const tentomon: MonsterDefinition = {
   stage: EvolutionStage.ROOKIE,
   baseStats: { hp: 58, atk: 22, def: 16 },
   statCaps: { hp: 190, atk: 58, def: 48 },
-  evolutionRequirement: { hp: 50, atk: 18, def: 14, bossWorld: 1 },
+  evolutionRequirement: { hp: 40, atk: 16, def: 12, bossWorld: 1 },
   evolutionPaths: [
     { targetId: "growlmon", branchType: BranchType.ATK },
     { targetId: "angemon", branchType: BranchType.HP },
@@ -103,7 +103,7 @@ const elecmon: MonsterDefinition = {
   stage: EvolutionStage.ROOKIE,
   baseStats: { hp: 62, atk: 22, def: 14 },
   statCaps: { hp: 195, atk: 62, def: 48 },
-  evolutionRequirement: { hp: 50, atk: 18, def: 14, bossWorld: 1 },
+  evolutionRequirement: { hp: 40, atk: 16, def: 12, bossWorld: 1 },
   evolutionPaths: [
     { targetId: "leomon", branchType: BranchType.ATK },
     { targetId: "birdramon", branchType: BranchType.HP },
@@ -120,7 +120,7 @@ const gomamon: MonsterDefinition = {
   stage: EvolutionStage.ROOKIE,
   baseStats: { hp: 68, atk: 17, def: 17 },
   statCaps: { hp: 210, atk: 52, def: 52 },
-  evolutionRequirement: { hp: 50, atk: 18, def: 14, bossWorld: 1 },
+  evolutionRequirement: { hp: 40, atk: 16, def: 12, bossWorld: 1 },
   evolutionPaths: [
     { targetId: "togemon", branchType: BranchType.HP },
     { targetId: "leomon", branchType: BranchType.ATK },
@@ -137,7 +137,7 @@ const palmon: MonsterDefinition = {
   stage: EvolutionStage.ROOKIE,
   baseStats: { hp: 66, atk: 19, def: 17 },
   statCaps: { hp: 205, atk: 55, def: 52 },
-  evolutionRequirement: { hp: 50, atk: 18, def: 14, bossWorld: 1 },
+  evolutionRequirement: { hp: 40, atk: 16, def: 12, bossWorld: 1 },
   evolutionPaths: [
     { targetId: "togemon", branchType: BranchType.HP },
     { targetId: "wizardmon", branchType: BranchType.ATK },
@@ -154,7 +154,7 @@ const gaomon: MonsterDefinition = {
   stage: EvolutionStage.ROOKIE,
   baseStats: { hp: 58, atk: 23, def: 16 },
   statCaps: { hp: 188, atk: 62, def: 48 },
-  evolutionRequirement: { hp: 50, atk: 18, def: 14, bossWorld: 1 },
+  evolutionRequirement: { hp: 40, atk: 16, def: 12, bossWorld: 1 },
   evolutionPaths: [
     { targetId: "gaogamon", branchType: BranchType.ATK },
     { targetId: "birdramon", branchType: BranchType.HP },
@@ -171,7 +171,7 @@ const lopmon: MonsterDefinition = {
   stage: EvolutionStage.ROOKIE,
   baseStats: { hp: 64, atk: 18, def: 18 },
   statCaps: { hp: 200, atk: 54, def: 54 },
-  evolutionRequirement: { hp: 50, atk: 18, def: 14, bossWorld: 1 },
+  evolutionRequirement: { hp: 40, atk: 16, def: 12, bossWorld: 1 },
   evolutionPaths: [
     { targetId: "wendimon", branchType: BranchType.ATK },
     { targetId: "seasarmon", branchType: BranchType.HP },
@@ -188,7 +188,7 @@ const renamon: MonsterDefinition = {
   stage: EvolutionStage.ROOKIE,
   baseStats: { hp: 56, atk: 25, def: 14 },
   statCaps: { hp: 180, atk: 66, def: 46 },
-  evolutionRequirement: { hp: 50, atk: 18, def: 14, bossWorld: 1 },
+  evolutionRequirement: { hp: 40, atk: 16, def: 12, bossWorld: 1 },
   evolutionPaths: [
     { targetId: "kyubimon", branchType: BranchType.ATK },
     { targetId: "wizardmon", branchType: BranchType.HP },
@@ -205,7 +205,7 @@ const veemon: MonsterDefinition = {
   stage: EvolutionStage.ROOKIE,
   baseStats: { hp: 63, atk: 22, def: 15 },
   statCaps: { hp: 198, atk: 60, def: 50 },
-  evolutionRequirement: { hp: 50, atk: 18, def: 14, bossWorld: 1 },
+  evolutionRequirement: { hp: 40, atk: 16, def: 12, bossWorld: 1 },
   evolutionPaths: [
     { targetId: "xveemon", branchType: BranchType.ATK },
     { targetId: "greymon", branchType: BranchType.HP },
@@ -222,7 +222,7 @@ const wormmon: MonsterDefinition = {
   stage: EvolutionStage.ROOKIE,
   baseStats: { hp: 60, atk: 16, def: 19 },
   statCaps: { hp: 195, atk: 50, def: 55 },
-  evolutionRequirement: { hp: 50, atk: 18, def: 14, bossWorld: 1 },
+  evolutionRequirement: { hp: 40, atk: 16, def: 12, bossWorld: 1 },
   evolutionPaths: [
     { targetId: "stingmon", branchType: BranchType.ATK },
     { targetId: "aquilamon", branchType: BranchType.HP },
@@ -239,7 +239,7 @@ const hawkmon: MonsterDefinition = {
   stage: EvolutionStage.ROOKIE,
   baseStats: { hp: 61, atk: 21, def: 16 },
   statCaps: { hp: 196, atk: 58, def: 50 },
-  evolutionRequirement: { hp: 50, atk: 18, def: 14, bossWorld: 1 },
+  evolutionRequirement: { hp: 40, atk: 16, def: 12, bossWorld: 1 },
   evolutionPaths: [
     { targetId: "aquilamon", branchType: BranchType.ATK },
     { targetId: "birdramon", branchType: BranchType.HP },

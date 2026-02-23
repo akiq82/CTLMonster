@@ -6,7 +6,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { zustandStorage } from "./storage";
+import { slotStorage } from "./storage";
 import type { WorldProgress } from "../types/world";
 import {
   createInitialWorldProgress,
@@ -129,7 +129,7 @@ export const useWorldStore = create<WorldState & WorldActions>()(
     }),
     {
       name: "digiride-world",
-      storage: zustandStorage,
+      storage: slotStorage,
     }
   )
 );

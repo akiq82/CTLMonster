@@ -166,6 +166,8 @@ interface RawWorkout {
   duration: number;
   tss: number;
   intensityFactor: number;
+  distance: number;
+  elevationGain: number;
   zoneTime: {
     ss?: number;
     z1: number;
@@ -232,6 +234,8 @@ export async function fetchRecentWorkouts(
       z6: w.zoneTime.z6,
       z7: w.zoneTime.z7,
     },
+    distance: w.distance ?? 0,
+    elevationGain: w.elevationGain ?? 0,
   }));
 }
 

@@ -31,6 +31,7 @@ function createTestMonster(overrides?: Partial<MonsterState>): MonsterState {
     memoryEquipment: null,
     mealsToday: 0,
     mealsYesterday: 0,
+    mealBonusRemaining: 0,
     lastLoginAt: new Date().toISOString(),
     wins: 0,
     losses: 0,
@@ -106,12 +107,12 @@ describe("Evolution Engine", () => {
       expect(meetsStatRequirements(monster, targetDef)).toBe(true);
     });
 
-    it("koromon→agumon condition: HP≥50, ATK≥18, DEF≥14", () => {
+    it("koromon→agumon condition: HP≥40, ATK≥16, DEF≥12", () => {
       const monster = createTestMonster({
         definitionId: "koromon",
-        maxHp: 50,
-        atk: 18,
-        def: 14,
+        maxHp: 40,
+        atk: 16,
+        def: 12,
       });
       const targetDef = MONSTER_DEFINITIONS.get("agumon")!;
       expect(meetsStatRequirements(monster, targetDef)).toBe(true);
@@ -126,7 +127,7 @@ describe("Evolution Engine", () => {
 
     it("agumon (target) has W1 boss req → checks W1 progress", () => {
       const targetDef = MONSTER_DEFINITIONS.get("agumon")!;
-      // agumon's evolutionRequirement = {hp:50, atk:18, def:14, bossWorld:1}
+      // agumon's evolutionRequirement = {hp:40, atk:16, def:12, bossWorld:1}
 
       // No progress → false
       expect(meetsBossRequirement(targetDef, new Map())).toBe(false);
@@ -172,9 +173,9 @@ describe("Evolution Engine", () => {
     it("should return true for koromon when W1 boss defeated and stats met", () => {
       const monster = createTestMonster({
         definitionId: "koromon",
-        maxHp: 50,
-        atk: 18,
-        def: 14,
+        maxHp: 40,
+        atk: 16,
+        def: 12,
       });
       // koromon→agumon requires W1 boss
       const worldProgress = new Map<number, WorldProgress>([
@@ -186,9 +187,9 @@ describe("Evolution Engine", () => {
     it("should return false for koromon without W1 boss", () => {
       const monster = createTestMonster({
         definitionId: "koromon",
-        maxHp: 50,
-        atk: 18,
-        def: 14,
+        maxHp: 40,
+        atk: 16,
+        def: 12,
       });
       expect(canEvolve(monster, new Map())).toBe(false);
     });
@@ -234,9 +235,9 @@ describe("Evolution Engine", () => {
     it("should update definitionId and record history", () => {
       const monster = createTestMonster({
         definitionId: "koromon",
-        maxHp: 50,
-        atk: 18,
-        def: 14,
+        maxHp: 42,
+        atk: 21,
+        def: 20,
       });
       const target = { targetId: "agumon", branchType: BranchType.HP };
 

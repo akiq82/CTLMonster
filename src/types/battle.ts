@@ -61,11 +61,11 @@ export interface BattleResult {
 
 /** エンカウント結果 */
 export interface EncounterResult {
-  /** エンカウント成功したか (80%成功, 20%空振り) */
+  /** エンカウント成功したか (常にtrue: 空振り廃止済み) */
   encountered: boolean;
   /** WP消費量 */
   wpConsumed: number;
-  /** バトル結果 (空振りの場合null) */
+  /** バトル結果 */
   battleResult: BattleResult | null;
 }
 
@@ -101,10 +101,12 @@ export const WP_CONSTANTS = {
   WP_PER_STEP: 1,
   /** 1階あたりのWP */
   WP_PER_FLOOR: 100,
+  /** 1kmあたりのWP (40km ≒ 10k歩相当) */
+  WP_PER_RIDE_KM: 250,
+  /** 獲得標高1mあたりのWP (1,000m ≒ 10k歩相当) */
+  WP_PER_RIDE_ELEVATION_M: 10,
   /** エンカウント1回のWP消費 */
-  ENCOUNTER_WP_COST: 3000,
+  ENCOUNTER_WP_COST: 2000,
   /** ボス戦のWP消費 */
-  BOSS_WP_COST: 5000,
-  /** エンカウント成功率 */
-  ENCOUNTER_SUCCESS_RATE: 0.80,
+  BOSS_WP_COST: 3000,
 } as const;

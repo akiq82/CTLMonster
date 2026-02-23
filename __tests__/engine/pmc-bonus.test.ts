@@ -75,68 +75,84 @@ describe("PMC Bonus Calculator", () => {
     });
   });
 
-  describe("calculatePmcBonus - GDD concrete examples (Akihiro data)", () => {
-    it("CTL 52.8, TSB 6.3, 10000 steps → total 4, L:2 M:1 H:1", () => {
+  describe("calculatePmcBonus (BASE=28)", () => {
+    it("CTL 52.8, TSB 6.3, 10000 steps → total 16", () => {
       const result = calculatePmcBonus(52.8, 6.3, 10000);
       // PMC係数 = 0.5 + 0.04 + 0.06 = 0.60
       expect(result.pmcFactor).toBeCloseTo(0.6, 1);
       expect(result.stepsFactor).toBe(1.0);
-      // floor(8 × 0.60 × 1.0) = floor(4.8) = 4
-      expect(result.totalTp).toBe(4);
-      // 4/3 = 1余1 → L:2, M:1, H:1
-      expect(result.tpL).toBe(2);
-      expect(result.tpM).toBe(1);
-      expect(result.tpH).toBe(1);
-    });
-
-    it("CTL 52.8, TSB -22.0, 10000 steps → total 6, L:2 M:2 H:2", () => {
-      const result = calculatePmcBonus(52.8, -22.0, 10000);
-      expect(result.totalTp).toBe(6);
-      expect(result.tpL).toBe(2);
-      expect(result.tpM).toBe(2);
-      expect(result.tpH).toBe(2);
-    });
-
-    it("CTL 60.0, TSB -5.0, 12000 steps → total 7, L:3 M:2 H:2", () => {
-      const result = calculatePmcBonus(60.0, -5.0, 12000);
-      expect(result.stepsFactor).toBeCloseTo(1.2, 5);
-      expect(result.totalTp).toBe(7);
-      expect(result.tpL).toBe(3);
-      expect(result.tpM).toBe(2);
-      expect(result.tpH).toBe(2);
-    });
-
-    it("CTL 80.0, TSB -20.0, 10000 steps → total 9, L:3 M:3 H:3", () => {
-      const result = calculatePmcBonus(80.0, -20.0, 10000);
-      expect(result.totalTp).toBe(9);
-      expect(result.tpL).toBe(3);
-      expect(result.tpM).toBe(3);
-      expect(result.tpH).toBe(3);
-    });
-
-    it("CTL 90.0, TSB -30.0, 15000 steps → total 16, L:6 M:5 H:5", () => {
-      const result = calculatePmcBonus(90.0, -30.0, 15000);
-      expect(result.pmcFactor).toBeCloseTo(1.36, 1);
-      expect(result.stepsFactor).toBe(1.5);
+      // floor(28 × 0.60 × 1.0) = floor(16.8) = 16
       expect(result.totalTp).toBe(16);
+      // 16/3 = 5余1 → L:6, M:5, H:5
       expect(result.tpL).toBe(6);
       expect(result.tpM).toBe(5);
       expect(result.tpH).toBe(5);
+    });
+
+    it("CTL 52.8, TSB -22.0, 10000 steps → total 22", () => {
+      const result = calculatePmcBonus(52.8, -22.0, 10000);
+      // PMC係数 ≈ 0.79, floor(28 × 0.79) = floor(22.12) = 22
+      expect(result.totalTp).toBe(22);
+      // 22/3 = 7余1 → L:8, M:7, H:7
+      expect(result.tpL).toBe(8);
+      expect(result.tpM).toBe(7);
+      expect(result.tpH).toBe(7);
+    });
+
+    it("CTL 60.0, TSB -5.0, 12000 steps → total 25", () => {
+      const result = calculatePmcBonus(60.0, -5.0, 12000);
+      expect(result.stepsFactor).toBeCloseTo(1.2, 5);
+      // PMC係数 ≈ 0.77, floor(28 × 0.77 × 1.2) = floor(25.87) = 25
+      expect(result.totalTp).toBe(25);
+      // 25/3 = 8余1 → L:9, M:8, H:8
+      expect(result.tpL).toBe(9);
+      expect(result.tpM).toBe(8);
+      expect(result.tpH).toBe(8);
+    });
+
+    it("CTL 60.0, TSB 0, 10000 steps → total 20 (target scenario)", () => {
+      const result = calculatePmcBonus(60.0, 0, 10000);
+      // PMC係数 = 0.5 + 0.14 + 0.1 = 0.74, floor(28 × 0.74) = 20
+      expect(result.totalTp).toBe(20);
+      // 20/3 = 6余2 → L:8, M:6, H:6
+      expect(result.tpL).toBe(8);
+      expect(result.tpM).toBe(6);
+      expect(result.tpH).toBe(6);
+    });
+
+    it("CTL 80.0, TSB -20.0, 10000 steps → total 32", () => {
+      const result = calculatePmcBonus(80.0, -20.0, 10000);
+      // PMC係数 ≈ 1.15, floor(28 × 1.15) = floor(32.2) = 32
+      expect(result.totalTp).toBe(32);
+      // 32/3 = 10余2 → L:12, M:10, H:10
+      expect(result.tpL).toBe(12);
+      expect(result.tpM).toBe(10);
+      expect(result.tpH).toBe(10);
+    });
+
+    it("CTL 90.0, TSB -30.0, 15000 steps → total 57", () => {
+      const result = calculatePmcBonus(90.0, -30.0, 15000);
+      expect(result.pmcFactor).toBeCloseTo(1.36, 1);
+      expect(result.stepsFactor).toBe(1.5);
+      // floor(28 × 1.36 × 1.5) = floor(57.12) = 57
+      expect(result.totalTp).toBe(57);
+      // 57/3 = 19余0 → L:19, M:19, H:19
+      expect(result.tpL).toBe(19);
+      expect(result.tpM).toBe(19);
+      expect(result.tpH).toBe(19);
     });
   });
 
   describe("TP distribution", () => {
     it("should always have tpL + tpM + tpH = totalTp", () => {
-      for (let total = 0; total <= 20; total++) {
-        // Construct a case that produces this total
-        const result = calculatePmcBonus(100, -30, total * 10000 / 12);
+      for (let steps = 0; steps <= 15000; steps += 1000) {
+        const result = calculatePmcBonus(60, 0, steps);
         expect(result.tpL + result.tpM + result.tpH).toBe(result.totalTp);
       }
     });
 
     it("remainder should go to TP-L", () => {
-      // Total 7: 7/3 = 2余1 → L:3, M:2, H:2
-      const result = calculatePmcBonus(60.0, -5.0, 12000);
+      const result = calculatePmcBonus(60.0, 0, 10000);
       expect(result.tpL).toBeGreaterThanOrEqual(result.tpM);
       expect(result.tpL).toBeGreaterThanOrEqual(result.tpH);
     });

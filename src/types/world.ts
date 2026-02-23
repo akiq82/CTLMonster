@@ -66,7 +66,7 @@ export interface WorldProgress {
 /** ワールド共通定数 */
 export const WORLD_CONSTANTS = {
   /** ボス到達に必要な撃破数 */
-  REQUIRED_KILLS: 15,
+  REQUIRED_KILLS: 10,
   /** 全ワールド数 */
   TOTAL_WORLDS: 8,
 } as const;

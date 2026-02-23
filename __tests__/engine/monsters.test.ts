@@ -119,11 +119,11 @@ describe("Monster Definitions", () => {
       expect(req.bossWorld).toBeNull();
     });
 
-    it("Baby II → Rookie: HP≥50, ATK≥18, DEF≥14, W1 boss", () => {
+    it("Baby II → Rookie: HP≥40, ATK≥16, DEF≥12, W1 boss", () => {
       const req = EVOLUTION_REQUIREMENTS[EvolutionStage.BABY_II];
-      expect(req.hp).toBe(50);
-      expect(req.atk).toBe(18);
-      expect(req.def).toBe(14);
+      expect(req.hp).toBe(40);
+      expect(req.atk).toBe(16);
+      expect(req.def).toBe(12);
       expect(req.bossWorld).toBe(1);
     });
 

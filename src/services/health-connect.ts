@@ -188,3 +188,62 @@ export async function fetchHealthData(): Promise<HealthData> {
     wp: steps * WP_PER_STEP + floors * WP_PER_FLOOR,
   };
 }
+
+/**
+ * 指定日 (YYYY-MM-DD) の歩数・階段データを取得しWPを計算する
+ *
+ * アプリを開かなかった日の歩数救済に使用する。
+ * 指定日の 00:00〜翌日 00:00 の範囲でデータを取得する。
+ *
+ * @param dateStr - 取得対象日 (YYYY-MM-DD)
+ * @returns HealthData (steps, floors, wp)
+ */
+export async function fetchHealthDataForDate(
+  dateStr: string
+): Promise<HealthData> {
+  if (Platform.OS !== "android") {
+    return { steps: 0, floors: 0, wp: 0 };
+  }
+
+  try {
+    const { readRecords } = await import("react-native-health-connect");
+
+    const [year, month, day] = dateStr.split("-").map(Number);
+    const startOfDay = new Date(year, month - 1, day);
+    const endOfDay = new Date(year, month - 1, day + 1);
+
+    const [stepsResult, floorsResult] = await Promise.all([
+      readRecords("Steps", {
+        timeRangeFilter: {
+          operator: "between",
+          startTime: startOfDay.toISOString(),
+          endTime: endOfDay.toISOString(),
+        },
+      }),
+      readRecords("FloorsClimbed", {
+        timeRangeFilter: {
+          operator: "between",
+          startTime: startOfDay.toISOString(),
+          endTime: endOfDay.toISOString(),
+        },
+      }),
+    ]);
+
+    const steps = stepsResult.records.reduce(
+      (sum: number, r: { count: number }) => sum + r.count,
+      0
+    );
+    const floors = floorsResult.records.reduce(
+      (sum: number, r: { floors: number }) => sum + r.floors,
+      0
+    );
+
+    return {
+      steps,
+      floors,
+      wp: steps * WP_PER_STEP + floors * WP_PER_FLOOR,
+    };
+  } catch {
+    return { steps: 0, floors: 0, wp: 0 };
+  }
+}

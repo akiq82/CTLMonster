@@ -16,7 +16,6 @@ import { MONSTER_DEFINITIONS } from "../src/data/monsters";
 import {
   canEncounter,
   getEncounterCost,
-  rollEncounter,
   generateEnemy,
   generateBoss,
 } from "../src/engine/encounter";
@@ -29,7 +28,9 @@ type BattlePhase = "select" | "battling" | "result";
 export default function BattleScreen() {
   const router = useRouter();
   const wp = useGameStore((s) => s.wp);
+  const encounterCount = useGameStore((s) => s.encounterCount);
   const consumeWp = useGameStore((s) => s.consumeWp);
+  const consumeEncounter = useGameStore((s) => s.consumeEncounter);
   const monster = useMonsterStore((s) => s.monster);
   const applyBattleResult = useMonsterStore((s) => s.applyBattleResult);
   const currentWorldNumber = useWorldStore((s) => s.currentWorldNumber);
@@ -48,23 +49,18 @@ export default function BattleScreen() {
     [currentWorldNumber]
   );
   const canBoss = canChallengeBoss(progress);
-  const canMob = canEncounter(wp, false);
+  const canMob = encounterCount > 0;
   const canBossWp = canEncounter(wp, true);
 
   const startBattle = useCallback(
     (isBoss: boolean) => {
       if (!monster) return;
 
-      const cost = getEncounterCost(isBoss);
-      consumeWp(cost);
-
-      if (!isBoss) {
-        const encountered = rollEncounter(false);
-        if (!encountered) {
-          setMessage("空振り！モンスターは現れなかった...");
-          setPhase("result");
-          return;
-        }
+      if (isBoss) {
+        const cost = getEncounterCost(true);
+        consumeWp(cost);
+      } else {
+        consumeEncounter();
       }
 
       const player: BattleFighter = {
@@ -102,7 +98,7 @@ export default function BattleScreen() {
         }
       }
     },
-    [monster, world, consumeWp, applyBattleResult, addMobKill, addBossDefeat]
+    [monster, world, consumeWp, consumeEncounter, applyBattleResult, addMobKill, addBossDefeat]
   );
 
   const handleBattleComplete = useCallback(() => {
@@ -149,7 +145,7 @@ export default function BattleScreen() {
               disabled={!canMob}
             >
               <Text style={[styles.btnText, !canMob && styles.btnTextDisabled]}>
-                MOB BATTLE (3000WP)
+                MOB BATTLE (EN:{encounterCount})
               </Text>
             </Pressable>
 

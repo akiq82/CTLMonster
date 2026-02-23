@@ -6,7 +6,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { zustandStorage } from "./storage";
+import { slotStorage } from "./storage";
 import type { MonsterState } from "../types/monster";
 import type { TrainingMenuDefinition, TrainingResult } from "../types/training";
 import type { BattleResult } from "../types/battle";
@@ -82,13 +82,16 @@ export const useMonsterStore = create<MonsterStore>()(
       train: (menu) => {
         const monster = get().monster;
         if (!monster) return null;
-        const hasMealBonus = monster.mealsToday > 0;
+        const hasMealBonus = monster.mealBonusRemaining > 0;
         const result = executeTraining(menu, hasMealBonus);
         const updated = applyTrainingResult(
           { ...monster },
           result,
           menu
         );
+        if (hasMealBonus) {
+          updated.mealBonusRemaining -= 1;
+        }
         set({ monster: updated });
         return result;
       },
@@ -112,6 +115,9 @@ export const useMonsterStore = create<MonsterStore>()(
           if (!state.monster) return state;
           const m = { ...state.monster };
           m.mealsToday += 1;
+          m.mealBonusRemaining += 1;
+          // HP全回復 (GDD 7.2: 食事申告時にHP全回復)
+          m.currentHp = m.maxHp;
           const extension = rollMealLifespanExtension();
           m.lifespanExtension += extension;
           return { monster: m };
@@ -182,6 +188,7 @@ export const useMonsterStore = create<MonsterStore>()(
               ...state.monster,
               mealsYesterday: state.monster.mealsToday,
               mealsToday: 0,
+              mealBonusRemaining: 0,
             },
           };
         });
@@ -191,7 +198,7 @@ export const useMonsterStore = create<MonsterStore>()(
     }),
     {
       name: "digiride-monster",
-      storage: zustandStorage,
+      storage: slotStorage,
     }
   )
 );

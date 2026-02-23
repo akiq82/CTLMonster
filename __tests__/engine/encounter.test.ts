@@ -1,10 +1,11 @@
 import {
   canEncounter,
   getEncounterCost,
-  rollEncounter,
   generateEnemy,
   generateBoss,
   canChallengeBoss,
+  convertWpToEncounters,
+  calculateRideWp,
 } from "../../src/engine/encounter";
 import { WP_CONSTANTS } from "../../src/types/battle";
 import { WORLD_MAP } from "../../src/data/worlds";
@@ -15,32 +16,23 @@ function fixedRng(value: number): () => number {
 
 describe("Encounter Engine", () => {
   describe("canEncounter", () => {
-    it("should require 3000 WP for normal encounter", () => {
-      expect(canEncounter(3000, false)).toBe(true);
-      expect(canEncounter(2999, false)).toBe(false);
+    it("should require 2000 WP for normal encounter", () => {
+      expect(canEncounter(2000, false)).toBe(true);
+      expect(canEncounter(1999, false)).toBe(false);
     });
 
-    it("should require 5000 WP for boss encounter", () => {
-      expect(canEncounter(5000, true)).toBe(true);
-      expect(canEncounter(4999, true)).toBe(false);
+    it("should require 3000 WP for boss encounter", () => {
+      expect(canEncounter(3000, true)).toBe(true);
+      expect(canEncounter(2999, true)).toBe(false);
     });
   });
 
   describe("getEncounterCost", () => {
-    it("normal = 3000, boss = 5000", () => {
+    it("normal = 2000, boss = 3000", () => {
       expect(getEncounterCost(false)).toBe(WP_CONSTANTS.ENCOUNTER_WP_COST);
       expect(getEncounterCost(true)).toBe(WP_CONSTANTS.BOSS_WP_COST);
-    });
-  });
-
-  describe("rollEncounter", () => {
-    it("80% success rate for normal encounters", () => {
-      expect(rollEncounter(false, fixedRng(0.79))).toBe(true);
-      expect(rollEncounter(false, fixedRng(0.81))).toBe(false);
-    });
-
-    it("boss encounters always succeed", () => {
-      expect(rollEncounter(true, fixedRng(0.99))).toBe(true);
+      expect(getEncounterCost(false)).toBe(2000);
+      expect(getEncounterCost(true)).toBe(3000);
     });
   });
 
@@ -74,10 +66,78 @@ describe("Encounter Engine", () => {
   });
 
   describe("canChallengeBoss", () => {
-    it("should require 15 kills", () => {
-      expect(canChallengeBoss(14, 15)).toBe(false);
-      expect(canChallengeBoss(15, 15)).toBe(true);
-      expect(canChallengeBoss(20, 15)).toBe(true);
+    it("should require 10 kills", () => {
+      expect(canChallengeBoss(9, 10)).toBe(false);
+      expect(canChallengeBoss(10, 10)).toBe(true);
+      expect(canChallengeBoss(15, 10)).toBe(true);
+    });
+  });
+
+  describe("convertWpToEncounters", () => {
+    it("should not convert when WP < 2000", () => {
+      const result = convertWpToEncounters(1999);
+      expect(result.encountersGained).toBe(0);
+      expect(result.wpRemaining).toBe(1999);
+    });
+
+    it("should convert exactly once at WP = 2000", () => {
+      const result = convertWpToEncounters(2000);
+      expect(result.encountersGained).toBe(1);
+      expect(result.wpRemaining).toBe(0);
+    });
+
+    it("should convert 3 times at WP = 6000", () => {
+      const result = convertWpToEncounters(6000);
+      expect(result.encountersGained).toBe(3);
+      expect(result.wpRemaining).toBe(0);
+    });
+
+    it("should keep remainder WP after conversion", () => {
+      const result = convertWpToEncounters(7500);
+      expect(result.encountersGained).toBe(3);
+      expect(result.wpRemaining).toBe(1500);
+    });
+
+    it("should return 0 encounters for WP = 0", () => {
+      const result = convertWpToEncounters(0);
+      expect(result.encountersGained).toBe(0);
+      expect(result.wpRemaining).toBe(0);
+    });
+
+    it("no whiff: all encounters are confirmed battles", () => {
+      // With 10000 WP, should get exactly 5 encounters (no misses)
+      const result = convertWpToEncounters(10000);
+      expect(result.encountersGained).toBe(5);
+      expect(result.wpRemaining).toBe(0);
+    });
+  });
+
+  describe("calculateRideWp", () => {
+    it("should convert 40km ride to 10,000 WP", () => {
+      expect(calculateRideWp(40, 0)).toBe(10000);
+    });
+
+    it("should convert 1,000m elevation to 10,000 WP", () => {
+      expect(calculateRideWp(0, 1000)).toBe(10000);
+    });
+
+    it("should combine distance and elevation WP", () => {
+      // 61km + 108m → 15,250 + 1,080 = 16,330 WP
+      expect(calculateRideWp(61, 108)).toBe(15250 + 1080);
+    });
+
+    it("should handle zero values", () => {
+      expect(calculateRideWp(0, 0)).toBe(0);
+    });
+
+    it("should floor fractional km", () => {
+      // 10.5km → floor(10.5 × 250) = floor(2625) = 2625
+      expect(calculateRideWp(10.5, 0)).toBe(2625);
+    });
+
+    it("should floor fractional elevation", () => {
+      // 50.7m → floor(50.7 × 10) = floor(507) = 507
+      expect(calculateRideWp(0, 50.7)).toBe(507);
     });
   });
 });

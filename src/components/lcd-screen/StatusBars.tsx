@@ -27,6 +27,12 @@ interface StatusBarsProps {
   tpH: number;
   /** WP */
   wp: number;
+  /** エンカウント回数 */
+  encounterCount: number;
+  /** 本日の食事回数 */
+  mealsToday: number;
+  /** 残り食事ボーナス回数 */
+  mealBonusRemaining: number;
 }
 
 function PixelBar({
@@ -73,7 +79,14 @@ export function StatusBars({
   tpM,
   tpH,
   wp,
+  encounterCount,
+  mealsToday,
+  mealBonusRemaining,
 }: StatusBarsProps) {
+  const remainingDays = Math.max(0, maxLifespan - daysAlive);
+  const remainingHours = Math.floor((remainingDays % 1) * 24);
+  const remainingWholeDays = Math.floor(remainingDays);
+
   return (
     <View style={styles.container}>
       <PixelBar label="HP" current={currentHp} max={maxHp} />
@@ -84,11 +97,22 @@ export function StatusBars({
         max={Math.ceil(maxLifespan)}
       />
 
+      {/* Lifespan remaining detail + meal count */}
+      <View style={styles.infoRow}>
+        <Text style={styles.infoText}>
+          残:{remainingWholeDays}日{remainingHours}h
+        </Text>
+        <Text style={styles.infoText}>
+          食:{mealsToday}/3{mealBonusRemaining > 0 ? ` x1.1(${mealBonusRemaining})` : ""}
+        </Text>
+      </View>
+
       <View style={styles.countersRow}>
         <Text style={styles.counterText}>L:{tpL}</Text>
         <Text style={styles.counterText}>M:{tpM}</Text>
         <Text style={styles.counterText}>H:{tpH}</Text>
         <Text style={styles.counterText}>WP:{wp}</Text>
+        <Text style={styles.counterText}>EN:{encounterCount}</Text>
       </View>
     </View>
   );
@@ -134,6 +158,17 @@ const styles = StyleSheet.create({
     fontFamily: "monospace",
     width: 48,
     textAlign: "right",
+  },
+  infoRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 2,
+    marginTop: 2,
+  },
+  infoText: {
+    color: LCD_COLORS.DOT_LIGHT,
+    fontSize: 8,
+    fontFamily: "monospace",
   },
   countersRow: {
     flexDirection: "row",

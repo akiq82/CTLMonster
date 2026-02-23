@@ -1,18 +1,12 @@
 /**
- * ゾーン別擬似TSS → TP変換エンジン
+ * ワークアウトTP変換エンジン
  *
- * GDD.md セクション5.3 に基づく。
+ * TSS 1 = TP 1 の原則で、実TSSをゾーン別擬似TSS比率でL/M/Hに分配する。
  *
  * 計算式:
- *   ゾーン別擬似TSS = (ゾーン滞在秒数 / 3600) × IF係数² × 100
- *
- *   低強度擬似TSS = Z1擬似TSS + Z2擬似TSS
- *   中強度擬似TSS = Z3擬似TSS + Z4擬似TSS
- *   高強度擬似TSS = Z5擬似TSS + Z6擬似TSS + Z7擬似TSS
- *
- *   TP-L = floor(低強度擬似TSS × 0.6)
- *   TP-M = floor(中強度擬似TSS × 0.8)
- *   TP-H = floor(高強度擬似TSS × 1.0)
+ *   1. ゾーン別擬似TSS = (ゾーン滞在秒数 / 3600) × IF係数² × 100
+ *   2. 低/中/高強度の擬似TSS比率を計算
+ *   3. 実TSS × 各比率 → TP-L/M/H (floor)
  *
  * IF係数:
  *   Z1: 0.55, Z2: 0.75, Z3: 0.90, Z4: 1.00, Z5: 1.10, Z6: 1.20, Z7: 1.30
@@ -22,7 +16,6 @@ import {
   ZoneTime,
   TrainingPoints,
   ZONE_IF_COEFFICIENTS,
-  TP_CONVERSION_RATES,
 } from "../types/training";
 
 /**
@@ -66,22 +59,29 @@ export function calculatePseudoTssByIntensity(zoneTime: ZoneTime): {
 }
 
 /**
- * ワークアウトのゾーン別滞在時間からTPを計算する
+ * ワークアウトの実TSSをゾーン別擬似TSS比率でTP-L/M/Hに分配する
  *
- * GDD.md セクション5.3 の計算式に完全準拠:
- *   TP-L = floor(低強度擬似TSS × 0.6)
- *   TP-M = floor(中強度擬似TSS × 0.8)
- *   TP-H = floor(高強度擬似TSS × 1.0)
+ * TSS 1 = TP 1 の原則:
+ *   1. ゾーン別擬似TSSで低/中/高の比率を計算
+ *   2. 実TSS × 各比率 → floor → TP
+ *
+ * 例: TSS=97, 擬似TSS比率 L:80%/M:19%/H:1% → L:77, M:18, H:0 (合計95)
  *
  * @param zoneTime - ゾーン別滞在時間（秒）
+ * @param tss - ワークアウトの実TSS
  * @returns 3系統のTP
  */
-export function calculateWorkoutTp(zoneTime: ZoneTime): TrainingPoints {
+export function calculateWorkoutTp(zoneTime: ZoneTime, tss: number): TrainingPoints {
   const pseudoTss = calculatePseudoTssByIntensity(zoneTime);
+  const totalPseudoTss = pseudoTss.low + pseudoTss.mid + pseudoTss.high;
+
+  if (totalPseudoTss === 0 || tss <= 0) {
+    return { low: 0, mid: 0, high: 0 };
+  }
 
   return {
-    low: Math.floor(pseudoTss.low * TP_CONVERSION_RATES.low),
-    mid: Math.floor(pseudoTss.mid * TP_CONVERSION_RATES.mid),
-    high: Math.floor(pseudoTss.high * TP_CONVERSION_RATES.high),
+    low: Math.floor(tss * (pseudoTss.low / totalPseudoTss)),
+    mid: Math.floor(tss * (pseudoTss.mid / totalPseudoTss)),
+    high: Math.floor(tss * (pseudoTss.high / totalPseudoTss)),
   };
 }

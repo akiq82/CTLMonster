@@ -39,6 +39,10 @@ export interface WorkoutZoneData {
     z6: number;
     z7: number;
   };
+  /** 走行距離 (km) */
+  distance: number;
+  /** 獲得標高 (meters) */
+  elevationGain: number;
 }
 
 /** PMCボーナスランク */

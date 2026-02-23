@@ -60,3 +60,54 @@ export function chance(
 export function randomPick<T>(array: readonly T[], rng: RngFn = Math.random): T {
   return array[Math.floor(rng() * array.length)];
 }
+
+/** 重み付きバケット定義 */
+export interface WeightedBucket {
+  /** バケット下限 (含む) */
+  readonly min: number;
+  /** バケット上限 (含まない。ただし最後のバケットは含む) */
+  readonly max: number;
+  /** 選択確率 (0.0〜1.0, 合計1.0) */
+  readonly weight: number;
+}
+
+/**
+ * 重み付きバケットからランダムに値を選ぶ
+ *
+ * 1. rng1 でバケットを確率に基づき選択
+ * 2. rng2 でバケット内の値を均一ランダムに選択
+ * 3. precision で小数点丸め (例: 0.1 → 小数第1位)
+ *
+ * @param buckets - 重み付きバケット配列 (weight合計 = 1.0)
+ * @param precision - 値の精度 (例: 0.1, 0.01)
+ * @param rng - 乱数生成関数 (バケット選択とバケット内選択の両方に使用)
+ * @returns バケットから選ばれた値
+ */
+export function randomFromBuckets(
+  buckets: readonly WeightedBucket[],
+  precision: number,
+  rng: RngFn = Math.random
+): number {
+  // バケット選択
+  const r1 = rng();
+  let cumulative = 0;
+  let selected = buckets[buckets.length - 1];
+  for (const bucket of buckets) {
+    cumulative += bucket.weight;
+    if (r1 < cumulative) {
+      selected = bucket;
+      break;
+    }
+  }
+
+  // バケット内でランダム値を生成
+  const raw = rng() * (selected.max - selected.min) + selected.min;
+
+  // 精度に丸め (min以上max以下にクランプ)
+  const rounded = Math.round(raw / precision) * precision;
+  // 浮動小数点誤差対策
+  const digits = Math.round(-Math.log10(precision));
+  const result = parseFloat(rounded.toFixed(digits));
+
+  return Math.max(selected.min, Math.min(selected.max, result));
+}
