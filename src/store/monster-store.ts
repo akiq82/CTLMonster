@@ -100,7 +100,7 @@ export const useMonsterStore = create<MonsterStore>()(
         set((state) => {
           if (!state.monster) return state;
           const m = { ...state.monster };
-          m.currentHp = Math.max(1, result.playerRemainingHp);
+          m.currentHp = m.maxHp;
           if (result.playerWon) {
             m.wins += 1;
           } else {

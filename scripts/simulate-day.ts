@@ -1,11 +1,19 @@
 /**
- * 一週間ループシミュレーション — モンスター死亡まで自動実行
+ * 多世代シミュレーション — 全8ワールド攻略 or 世代上限まで自動実行
  *
- * 固定パラメータ: CTL=60, TSB=0, 歩数=8000, 階段=5, 食事=1回
+ * 固定パラメータ: CTL=80, TSB=0, 歩数=10000, 階段=5, 食事=3回
  * ライドパターン: 7日周期でループ
+ *
+ * 変更点:
+ *   - baseTp: PMCボーナス + バトルXP(毎バトル+1) をベースTPプールに統合
+ *   - シミュレーション戦略: トレーニング前にbaseTpをL/M/H均等配分
+ *   - モブ3段階化: generateEnemy に killCount を渡す
+ *   - 小数ステータス: .toFixed(1) で表示
+ *   - 転生: 寿命到達後に次世代を自動生成して継続
+ *   - ワールド進行: ボス撃破後、次ワールドへ自動遷移 (W1→W2→...→W8)
  */
 
-import { createFirstGeneration, createMemoryEquipment } from "../src/engine/generation";
+import { createFirstGeneration, createNextGeneration, createMemoryEquipment } from "../src/engine/generation";
 import { calculatePmcBonus, determinePmcRank } from "../src/engine/pmc-bonus";
 import { calculateDailyDisciplineChange, applyDisciplineChange } from "../src/engine/discipline";
 import { calculateWorkoutTp } from "../src/engine/tp-calculator";
@@ -24,6 +32,7 @@ import {
 import { TRAINING_MENUS } from "../src/data/training-menus";
 import { MONSTER_DEFINITIONS } from "../src/data/monsters";
 import { WP_CONSTANTS } from "../src/types/battle";
+import { WORLD_CONSTANTS } from "../src/types/world";
 import type { MonsterState } from "../src/types/monster";
 import type { WorldProgress } from "../src/types/world";
 import type { BattleFighter } from "../src/types/battle";
@@ -32,11 +41,13 @@ import type { ZoneTime } from "../src/types/training";
 // ============================================================
 // 固定パラメータ
 // ============================================================
-const STEPS = 8_000;
+const STEPS = 10_000;
 const FLOORS = 5;
-const MEALS = 1;
-const CTL = 60;
+const MEALS = 3;
+const CTL = 80;
 const TSB = 0;
+const MAX_GENERATIONS = 50;
+const STOP_ON_BOSS = false; // true: ボス撃破で停止, false: 世代上限まで継続
 
 // ============================================================
 // ライドパターン定義 (7日周期)
@@ -55,13 +66,13 @@ const INTENSITY = {
 interface RidePattern { low: number; mid: number; high: number; label: string }
 
 const RIDE_PATTERNS: RidePattern[] = [
-  { low: 30,  mid: 0,   high: 0,  label: "低30min" },
-  { low: 50,  mid: 0,   high: 10, label: "高10+低50min" },
-  { low: 30,  mid: 30,  high: 0,  label: "中30+低30min" },
-  { low: 50,  mid: 0,   high: 10, label: "高10+低50min" },
-  { low: 30,  mid: 0,   high: 0,  label: "低30min" },
-  { low: 50,  mid: 20,  high: 10, label: "高10+低50+中20min" },
-  { low: 220, mid: 20,  high: 0,  label: "中20+低220min" },
+  { low: 60,  mid: 0,   high: 0,  label: "低60min" },
+  { low: 40,  mid: 20,  high: 15, label: "高15+中20+低40min" },
+  { low: 30,  mid: 45,  high: 0,  label: "中45+低30min" },
+  { low: 40,  mid: 20,  high: 15, label: "高15+中20+低40min" },
+  { low: 60,  mid: 0,   high: 0,  label: "低60min" },
+  { low: 60,  mid: 30,  high: 15, label: "高15+中30+低60min" },
+  { low: 240, mid: 30,  high: 0,  label: "中30+低240min" },
 ];
 
 function buildRide(pattern: RidePattern) {
@@ -104,132 +115,270 @@ function label(m: MonsterState): string {
 const MENU_PRIORITY = ["hill-climb", "sweet-spot", "endurance", "tempo", "race-skills", "lsd", "vo2max-interval", "anaerobic-sprint"];
 
 // ============================================================
-// メイン
+// 1世代シミュレーション
 // ============================================================
-console.log("╔═════════════════════════════════════════════════════════════╗");
-console.log("║  寿命シミュレーション | CTL60 TSB0 歩数8k 食事1回/日      ║");
-console.log("╚═════════════════════════════════════════════════════════════╝\n");
+function simulateGeneration(
+  monster: MonsterState,
+  globalDay: number,
+  inheritedWMap: Map<number, WorldProgress> | null = null,
+): { monster: MonsterState; globalDay: number; wMap: Map<number, WorldProgress>; highestWorldCleared: number } {
+  // Inherit world progress from previous generation (cleared worlds persist)
+  const wMap = inheritedWMap ? new Map(inheritedWMap) : new Map<number, WorldProgress>();
 
-const monster = createFirstGeneration("アキヒロ1号", "botamon");
-console.log(`誕生: ${label(monster)} | 寿命${monster.baseLifespan.toFixed(1)}日 | HP${monster.maxHp} ATK${monster.atk} DEF${monster.def}\n`);
-
-let wp: WorldProgress = createInitialWorldProgress();
-const wMap = new Map<number, WorldProgress>(); wMap.set(1, wp);
-let tpL = 0, tpM = 0, tpH = 0, storedWp = 0;
-let totalW = 0, totalL = 0;
-
-for (let day = 1; day <= 30; day++) {
-  const elapsed = day - 1;
-  const lifeTotal = monster.baseLifespan + monster.lifespanExtension;
-  if (elapsed >= lifeTotal) {
-    console.log(`\n══ Day ${day} 朝: 寿命到達 (${elapsed}日経過 / ${lifeTotal.toFixed(2)}日) ══`);
-    break;
+  // Determine current world: highest cleared + 1, or restart current world's mob progress
+  let currentWorldNumber = 1;
+  for (let w = 1; w <= 8; w++) {
+    const prog = wMap.get(w);
+    if (prog?.bossDefeated) {
+      currentWorldNumber = Math.min(w + 1, 8);
+    } else {
+      break;
+    }
   }
 
-  monster.currentHp = monster.maxHp; // 朝HP全回復
+  // Create fresh progress for the current world if not already tracked
+  if (!wMap.has(currentWorldNumber)) {
+    wMap.set(currentWorldNumber, { worldNumber: currentWorldNumber, killCount: 0, bossDefeated: false });
+  }
+  let wp = wMap.get(currentWorldNumber)!;
 
-  const ride = buildRide(RIDE_PATTERNS[(day - 1) % 7]);
+  let tpL = 0, tpM = 0, tpH = 0, storedWp = 0;
+  let baseTp = 0;
+  let totalW = 0, totalL = 0;
+  let highestWorldCleared = currentWorldNumber - 1;
 
-  // PMC
-  const pmc = calculatePmcBonus(CTL, TSB, STEPS);
-  tpL += pmc.tpL; tpM += pmc.tpM; tpH += pmc.tpH;
+  const memLabel = monster.memoryEquipment
+    ? ` | 装備: HP+${monster.memoryEquipment.hp} ATK+${monster.memoryEquipment.atk} DEF+${monster.memoryEquipment.def}`
+    : "";
+  console.log(`\n${"━".repeat(65)}`);
+  console.log(`  G${monster.generation} 誕生: ${label(monster)} | 寿命${monster.baseLifespan.toFixed(1)}日 | HP${monster.maxHp} ATK${monster.atk} DEF${monster.def}${memLabel}`);
+  console.log(`${"━".repeat(65)}\n`);
 
-  // 規律
-  const disc = calculateDailyDisciplineChange(determinePmcRank(CTL, TSB), MEALS);
-  monster.discipline = applyDisciplineChange(monster.discipline, disc);
+  for (let localDay = 1; localDay <= 30; localDay++) {
+    const day = globalDay + localDay - 1;
+    const elapsed = localDay - 1;
+    const lifeTotal = monster.baseLifespan + monster.lifespanExtension;
+    if (elapsed >= lifeTotal) {
+      console.log(`\n  ══ Day ${day} (G${monster.generation} ${localDay}日目): 寿命到達 (${elapsed}日経過 / ${lifeTotal.toFixed(2)}日) ══`);
+      globalDay = day;
+      break;
+    }
 
-  // ライドTP
-  const rTp = calculateWorkoutTp(ride.zoneTime, ride.tss);
-  tpL += rTp.low; tpM += rTp.mid; tpH += rTp.high;
+    monster.currentHp = monster.maxHp; // 朝HP全回復
 
-  // トレーニング
-  const tLog: string[] = [];
-  let tc = 0;
-  while (true) {
-    let ok = false;
-    for (const mid of MENU_PRIORITY) {
-      const menu = TRAINING_MENUS.find(m => m.id === mid)!;
-      if (canExecuteTraining(menu, { low: tpL, mid: tpM, high: tpH })) {
-        const r = executeTraining(menu, MEALS > 0);
-        applyTrainingResult(monster, r, menu);
-        tpL -= menu.costTpL; tpM -= menu.costTpM; tpH -= menu.costTpH;
-        tc++;
-        tLog.push(`${menu.nameEn}(+${r.hpGain}/+${r.atkGain}/+${r.defGain})`);
-        ok = true;
+    const ride = buildRide(RIDE_PATTERNS[(day - 1) % 7]);
+
+    // PMC → baseTp に加算
+    const pmc = calculatePmcBonus(CTL, TSB, STEPS);
+    baseTp += pmc.totalTp;
+
+    // 規律
+    const disc = calculateDailyDisciplineChange(determinePmcRank(CTL, TSB), MEALS);
+    monster.discipline = applyDisciplineChange(monster.discipline, disc);
+
+    // ライドTP (ゾーン別なので直接L/M/Hへ)
+    const rTp = calculateWorkoutTp(ride.zoneTime, ride.tss);
+    tpL += rTp.low; tpM += rTp.mid; tpH += rTp.high;
+
+    // baseTp をL/M/H均等配分 (シミュレーション戦略)
+    if (baseTp > 0) {
+      const each = Math.floor(baseTp / 3);
+      const remainder = baseTp - each * 3;
+      tpL += each + remainder; // 端数はLに
+      tpM += each;
+      tpH += each;
+      baseTp = 0;
+    }
+
+    // トレーニング
+    const tLog: string[] = [];
+    let tc = 0;
+    while (true) {
+      let ok = false;
+      for (const mid of MENU_PRIORITY) {
+        const menu = TRAINING_MENUS.find(m => m.id === mid)!;
+        if (canExecuteTraining(menu, { low: tpL, mid: tpM, high: tpH })) {
+          const r = executeTraining(menu, MEALS > 0);
+          applyTrainingResult(monster, r, menu);
+          tpL -= menu.costTpL; tpM -= menu.costTpM; tpH -= menu.costTpH;
+          tc++;
+          tLog.push(`${menu.nameEn}(+${r.hpGain.toFixed(1)}/+${r.atkGain.toFixed(1)}/+${r.defGain.toFixed(1)})`);
+          ok = true;
+          // 進化チェック
+          wMap.set(currentWorldNumber, wp);
+          if (canEvolve(monster, wMap)) {
+            const t = getEvolutionTarget(monster);
+            if (t) { const old = label(monster); applyEvolution(monster, t); tLog.push(`★${old}→${label(monster)}`); }
+          }
+          break;
+        }
+      }
+      if (!ok) break;
+    }
+
+    // WP & バトル
+    storedWp += STEPS + FLOORS * WP_CONSTANTS.WP_PER_FLOOR + calculateRideWp(ride.distanceKm, ride.elevationM);
+    const enc = convertWpToEncounters(storedWp);
+    storedWp = enc.wpRemaining;
+
+    let dW = 0, dL = 0;
+    const bLog: string[] = [];
+
+    for (let i = 0; i < enc.encountersGained; i++) {
+      const worldDef = getWorldDefinition(currentWorldNumber);
+      const boss = canChallengeBoss(wp) && !wp.bossDefeated;
+      const enemy = boss ? generateBoss(worldDef) : generateEnemy(worldDef.enemies, wp.killCount);
+      const player = makePlayerFighter(monster);
+      const br = executeBattle(player, enemy);
+
+      // バトルXP: 毎バトル +1 baseTp
+      baseTp += 1;
+
+      if (br.playerWon) {
+        dW++; monster.wins++;
+        monster.currentHp = monster.maxHp;
+        if (boss) {
+          wp = recordBossDefeat(wp); wMap.set(currentWorldNumber, wp);
+          bLog.push(`[W${currentWorldNumber}BOSS]${enemy.name}→★勝(${br.totalTurns}T,残HP${br.playerRemainingHp})`);
+          highestWorldCleared = Math.max(highestWorldCleared, currentWorldNumber);
+
+          // Advance to next world
+          if (currentWorldNumber < 8) {
+            currentWorldNumber++;
+            if (!wMap.has(currentWorldNumber)) {
+              wMap.set(currentWorldNumber, { worldNumber: currentWorldNumber, killCount: 0, bossDefeated: false });
+            }
+            wp = wMap.get(currentWorldNumber)!;
+            bLog.push(`→W${currentWorldNumber}(${getWorldDefinition(currentWorldNumber).name})へ`);
+          }
+        } else {
+          wp = recordMobKill(wp); wMap.set(currentWorldNumber, wp);
+          bLog.push(`${enemy.name}(${enemy.maxHp})→勝(${br.totalTurns}T)`);
+        }
         // 進化チェック
-        wMap.set(1, wp);
         if (canEvolve(monster, wMap)) {
           const t = getEvolutionTarget(monster);
-          if (t) { const old = label(monster); applyEvolution(monster, t); tLog.push(`★${old}→${label(monster)}`); }
+          if (t) { const old = label(monster); applyEvolution(monster, t); bLog.push(`★${old}→${label(monster)}`); }
         }
-        break;
+      } else {
+        dL++; monster.losses++; monster.currentHp = monster.maxHp;
+        bLog.push(`${enemy.name}(${enemy.maxHp}/${enemy.atk}/${enemy.def})→敗(${br.totalTurns}T)`);
       }
     }
-    if (!ok) break;
-  }
+    totalW += dW; totalL += dL;
 
-  // WP & バトル
-  storedWp += STEPS + FLOORS * WP_CONSTANTS.WP_PER_FLOOR + calculateRideWp(ride.distanceKm, ride.elevationM);
-  const enc = convertWpToEncounters(storedWp);
-  storedWp = enc.wpRemaining;
+    // 食事
+    let mExt = 0;
+    for (let i = 0; i < MEALS; i++) mExt += rollMealLifespanExtension();
+    monster.lifespanExtension += mExt;
 
-  const w1 = getWorldDefinition(1);
-  let dW = 0, dL = 0;
-  const bLog: string[] = [];
-  const gap = enc.encountersGained > 1 ? 14 / enc.encountersGained : 2;
+    const lifeRemain = monster.baseLifespan + monster.lifespanExtension - localDay;
 
-  for (let i = 0; i < enc.encountersGained; i++) {
-    const boss = canChallengeBoss(wp) && !wp.bossDefeated;
-    const enemy = boss ? generateBoss(w1) : generateEnemy(w1.enemies);
-    const player = makePlayerFighter(monster);
-    const br = executeBattle(player, enemy);
-
-    if (br.playerWon) {
-      dW++; monster.wins++;
-      monster.currentHp = Math.min(br.playerRemainingHp, monster.maxHp);
-      if (boss) { wp = recordBossDefeat(wp); wMap.set(1, wp); bLog.push(`[BOSS]${enemy.name}→★勝(${br.totalTurns}T,残HP${br.playerRemainingHp})`); }
-      else { wp = recordMobKill(wp); wMap.set(1, wp); bLog.push(`${enemy.name}(${enemy.maxHp})→勝(${br.totalTurns}T)`); }
-      // 進化チェック
-      if (canEvolve(monster, wMap)) {
-        const t = getEvolutionTarget(monster);
-        if (t) { const old = label(monster); applyEvolution(monster, t); bLog.push(`★${old}→${label(monster)}`); }
+    // 出力
+    console.log(`  ─── Day ${day} (G${monster.generation} ${localDay}日目) ─── ${RIDE_PATTERNS[(day - 1) % 7].label} (TSS${ride.tss})`);
+    console.log(`    TP: PMC=${pmc.totalTp}→base + ライドL${rTp.low}/M${rTp.mid}/H${rTp.high}`);
+    if (tLog.length) console.log(`    訓練(${tc}回): ${tLog.join(" → ")}`);
+    console.log(`    ステ: HP${monster.maxHp.toFixed(1)} ATK${monster.atk.toFixed(1)} DEF${monster.def.toFixed(1)} [${label(monster)}] 規律${monster.discipline}`);
+    console.log(`    残TP: L${tpL}/M${tpM}/H${tpH} base=${baseTp} | 累計: L${monster.totalTpL}/M${monster.totalTpM}/H${monster.totalTpH}`);
+    // World progress summary
+    const worldStatus = [];
+    for (let w = 1; w <= currentWorldNumber; w++) {
+      const prog = wMap.get(w);
+      if (prog) {
+        worldStatus.push(`W${w}:${prog.killCount}/${WORLD_CONSTANTS.REQUIRED_KILLS}${prog.bossDefeated ? "★" : ""}`);
       }
-    } else {
-      dL++; monster.losses++; monster.currentHp = 1;
-      bLog.push(`${enemy.name}(${enemy.maxHp}/${enemy.atk}/${enemy.def})→敗(${br.totalTurns}T)`);
     }
-    if (i < enc.encountersGained - 1) {
-      monster.currentHp = Math.min(monster.currentHp + Math.floor(monster.maxHp * 0.1 * gap), monster.maxHp);
+    console.log(`    バトル: ${dW}勝${dL}敗 (通算${totalW}W${totalL}L) | ${worldStatus.join(" ")}`);
+    if (bLog.length) console.log(`      ${bLog.join(" | ")}`);
+    console.log(`    寿命残: ${lifeRemain.toFixed(1)}日`);
+  }
+
+  // 世代サマリー
+  const worldSummaryParts: string[] = [];
+  for (let w = 1; w <= 8; w++) {
+    const prog = wMap.get(w);
+    if (prog) {
+      worldSummaryParts.push(`W${w}:${prog.killCount}体${prog.bossDefeated ? "+BOSS★" : ""}`);
     }
   }
-  totalW += dW; totalL += dL;
+  console.log(`\n  ┌─── G${monster.generation} サマリー ───┐`);
+  console.log(`  │ ${label(monster)}`);
+  console.log(`  │ HP${monster.maxHp.toFixed(1)} ATK${monster.atk.toFixed(1)} DEF${monster.def.toFixed(1)}`);
+  console.log(`  │ 訓練TP: L${monster.totalTpL}/M${monster.totalTpM}/H${monster.totalTpH} → ${determineBranchType(monster.totalTpL, monster.totalTpM, monster.totalTpH)}型`);
+  console.log(`  │ 通算: ${totalW}W${totalL}L | ${worldSummaryParts.join(" ")}`);
+  console.log(`  │ 進化: ${monster.evolutionHistory.join("→") || "なし"}`);
+  console.log(`  │ 寿命: ${monster.baseLifespan.toFixed(1)} + ${monster.lifespanExtension.toFixed(2)} = ${(monster.baseLifespan + monster.lifespanExtension).toFixed(2)}日`);
+  const mem = createMemoryEquipment(monster);
+  console.log(`  │ 転生装備: "${mem.name}" HP+${mem.hp} ATK+${mem.atk} DEF+${mem.def}`);
+  console.log(`  └${"─".repeat(25)}┘`);
 
-  // 食事
-  let mExt = 0;
-  for (let i = 0; i < MEALS; i++) mExt += rollMealLifespanExtension();
-  monster.lifespanExtension += mExt;
-
-  const lifeRemain = monster.baseLifespan + monster.lifespanExtension - day;
-
-  // 出力
-  console.log(`═══ Day ${day} ═══ ${RIDE_PATTERNS[(day - 1) % 7].label} (TSS${ride.tss})`);
-  console.log(`  TP獲得: PMC=${pmc.totalTp} + ライドL${rTp.low}/M${rTp.mid}/H${rTp.high}`);
-  if (tLog.length) console.log(`  訓練(${tc}回): ${tLog.join(" → ")}`);
-  console.log(`  ステ: HP${monster.maxHp} ATK${monster.atk} DEF${monster.def} [${label(monster)}] 規律${monster.discipline}`);
-  console.log(`  残TP: L${tpL}/M${tpM}/H${tpH} | 累計訓練: L${monster.totalTpL}/M${monster.totalTpM}/H${monster.totalTpH}`);
-  console.log(`  バトル: ${dW}勝${dL}敗 (通算${totalW}勝${totalL}敗) | W1: ${wp.killCount}/10${wp.bossDefeated ? " ★BOSS撃破" : ""}`);
-  if (bLog.length) console.log(`    ${bLog.join(" | ")}`);
-  console.log(`  寿命残: ${lifeRemain.toFixed(1)}日\n`);
+  return { monster, globalDay, wMap, highestWorldCleared, highestWorldReached: currentWorldNumber };
 }
 
-// 最終
+// ============================================================
+// メイン — 多世代ループ
+// ============================================================
 console.log("╔═════════════════════════════════════════════════════════════╗");
-console.log("║  最終サマリー                                             ║");
+console.log("║  多世代シミュレーション | CTL80 TSB0 歩数10k 食事3回/日   ║");
+console.log("║  [baseTp統合 + バトルXP + モブ3段階 + 小数ステ]           ║");
+console.log(`║  最大${MAX_GENERATIONS}世代 | ワールド自動進行 (W1→W8)                    ║`);
 console.log("╚═════════════════════════════════════════════════════════════╝");
-console.log(`  ${label(monster)} | HP${monster.maxHp} ATK${monster.atk} DEF${monster.def}`);
-console.log(`  累計訓練TP: L${monster.totalTpL}/M${monster.totalTpM}/H${monster.totalTpH} → ${determineBranchType(monster.totalTpL, monster.totalTpM, monster.totalTpH)}型`);
-console.log(`  通算: ${totalW}勝${totalL}敗 | W1: ${wp.killCount}体${wp.bossDefeated ? "+BOSS" : ""}`);
-console.log(`  進化履歴: ${monster.evolutionHistory.join("→") || "なし"}`);
-console.log(`  寿命: ${monster.baseLifespan.toFixed(1)} + ${monster.lifespanExtension.toFixed(2)} = ${(monster.baseLifespan + monster.lifespanExtension).toFixed(2)}日`);
-const mem = createMemoryEquipment(monster);
-console.log(`\n  【転生装備】"${mem.name}" HP+${mem.hp} ATK+${mem.atk} DEF+${mem.def}`);
+
+let monster = createFirstGeneration("アキヒロ1号", "botamon");
+let globalDay = 1;
+let currentWMap: Map<number, WorldProgress> | null = null;
+let overallHighestCleared = 0;
+let overallHighestReached = 1;
+
+for (let gen = 1; gen <= MAX_GENERATIONS; gen++) {
+  const result = simulateGeneration(monster, globalDay, currentWMap);
+  monster = result.monster;
+  globalDay = result.globalDay;
+  currentWMap = result.wMap;
+  overallHighestCleared = Math.max(overallHighestCleared, result.highestWorldCleared);
+  overallHighestReached = Math.max(overallHighestReached, result.highestWorldReached);
+
+  if (result.highestWorldCleared > 0) {
+    const clearedNames = [];
+    for (let w = 1; w <= result.highestWorldCleared; w++) {
+      if (result.wMap.get(w)?.bossDefeated) {
+        clearedNames.push(`W${w}`);
+      }
+    }
+    if (clearedNames.length > 0) {
+      console.log(`\n  クリア済: ${clearedNames.join(", ")}`);
+    }
+  }
+
+  if (gen < MAX_GENERATIONS) {
+    const nextName = `アキヒロ${gen + 1}号`;
+    console.log(`\n  ▶ 転生: ${monster.name} → ${nextName}`);
+    monster = createNextGeneration(monster, nextName);
+    globalDay += 1; // 転生に1日消費
+  }
+}
+
+// 最終サマリー
+const clearedWorldsList: string[] = [];
+if (currentWMap) {
+  for (let w = 1; w <= 8; w++) {
+    const prog = currentWMap.get(w);
+    if (prog?.bossDefeated) clearedWorldsList.push(`W${w}(${getWorldDefinition(w).name})`);
+  }
+}
+console.log(`\n${"═".repeat(65)}`);
+console.log(`  最終結果: G${monster.generation} ${label(monster)}`);
+console.log(`  総経過日数: ${globalDay}日`);
+console.log(`  最高到達: W${overallHighestReached}(${getWorldDefinition(overallHighestReached).name})`);
+console.log(`  クリア済ワールド: ${clearedWorldsList.length > 0 ? clearedWorldsList.join(", ") : "なし"}`);
+if (currentWMap) {
+  // Show current world in progress
+  for (let w = 1; w <= 8; w++) {
+    const prog = currentWMap.get(w);
+    if (prog && !prog.bossDefeated) {
+      console.log(`  進行中: W${w}(${getWorldDefinition(w).name}) ${prog.killCount}/${WORLD_CONSTANTS.REQUIRED_KILLS}体`);
+      break;
+    }
+  }
+}
+console.log(`${"═".repeat(65)}`);

@@ -70,12 +70,65 @@ const zurumon: MonsterDefinition = {
   statCaps: { hp: 30, atk: 10, def: 8 },
   evolutionRequirement: null,
   evolutionPaths: [
-    { targetId: "bukamon", branchType: BranchType.HP },
+    { targetId: "goblimon", branchType: BranchType.HP },
     { targetId: "gigimon", branchType: BranchType.ATK },
-    { targetId: "nyaromon", branchType: BranchType.DEF },
+    { targetId: "kunemon", branchType: BranchType.DEF },
     { targetId: "koromon", branchType: BranchType.BALANCED },
   ],
   description: "黒い粘液状のモンスター。攻撃的な本能が芽生えている。",
+  isEnemyOnly: false,
+};
+
+// ========== 02世代 ==========
+
+const chibomon: MonsterDefinition = {
+  id: "chibomon",
+  name: "チコモン",
+  stage: EvolutionStage.BABY_I,
+  baseStats: { hp: 11, atk: 3, def: 2 },
+  statCaps: { hp: 30, atk: 10, def: 8 },
+  evolutionRequirement: null,
+  evolutionPaths: [
+    { targetId: "demiveemon", branchType: BranchType.HP },
+    { targetId: "demiveemon", branchType: BranchType.ATK },
+    { targetId: "upamon", branchType: BranchType.DEF },
+    { targetId: "poromon", branchType: BranchType.BALANCED },
+  ],
+  description: "02世代のスターター。元気な小竜型の幼年体。ブイモンの始祖。",
+  isEnemyOnly: false,
+};
+
+const leafmon: MonsterDefinition = {
+  id: "leafmon",
+  name: "リーフモン",
+  stage: EvolutionStage.BABY_I,
+  baseStats: { hp: 10, atk: 2, def: 3 },
+  statCaps: { hp: 30, atk: 10, def: 8 },
+  evolutionRequirement: null,
+  evolutionPaths: [
+    { targetId: "minomon", branchType: BranchType.DEF },
+    { targetId: "minomon", branchType: BranchType.HP },
+    { targetId: "kunemon", branchType: BranchType.ATK },
+    { targetId: "tanemon", branchType: BranchType.BALANCED },
+  ],
+  description: "葉のような姿の幼年体。ワームモンの始祖。優しい心を持つ。",
+  isEnemyOnly: false,
+};
+
+const tsubumon: MonsterDefinition = {
+  id: "tsubumon",
+  name: "ツブモン",
+  stage: EvolutionStage.BABY_I,
+  baseStats: { hp: 12, atk: 2, def: 3 },
+  statCaps: { hp: 30, atk: 10, def: 8 },
+  evolutionRequirement: null,
+  evolutionPaths: [
+    { targetId: "upamon", branchType: BranchType.HP },
+    { targetId: "poromon", branchType: BranchType.DEF },
+    { targetId: "motimon", branchType: BranchType.ATK },
+    { targetId: "upamon", branchType: BranchType.BALANCED },
+  ],
+  description: "丸い粒のような姿の幼年体。アルマジモンの始祖。",
   isEnemyOnly: false,
 };
 
@@ -85,4 +138,7 @@ export const BABY_I_MONSTERS: readonly MonsterDefinition[] = [
   punimon,
   yuramon,
   zurumon,
+  chibomon,
+  leafmon,
+  tsubumon,
 ] as const;

@@ -90,7 +90,7 @@ const tentomon: MonsterDefinition = {
   evolutionPaths: [
     { targetId: "growlmon", branchType: BranchType.ATK },
     { targetId: "angemon", branchType: BranchType.HP },
-    { targetId: "garurumon", branchType: BranchType.DEF },
+    { targetId: "kuwagamon", branchType: BranchType.DEF },
     { targetId: "greymon", branchType: BranchType.BALANCED },
   ],
   description: "昆虫型モンスター。電気技で敵を痺れさせる。",
@@ -124,7 +124,7 @@ const gomamon: MonsterDefinition = {
   evolutionPaths: [
     { targetId: "togemon", branchType: BranchType.HP },
     { targetId: "leomon", branchType: BranchType.ATK },
-    { targetId: "seasarmon", branchType: BranchType.DEF },
+    { targetId: "seadramon", branchType: BranchType.DEF },
     { targetId: "birdramon", branchType: BranchType.BALANCED },
   ],
   description: "海獣型モンスター。陽気な性格で泳ぎが得意。HPが高い。",
@@ -157,7 +157,7 @@ const gaomon: MonsterDefinition = {
   evolutionRequirement: { hp: 40, atk: 16, def: 12, bossWorld: 1 },
   evolutionPaths: [
     { targetId: "gaogamon", branchType: BranchType.ATK },
-    { targetId: "birdramon", branchType: BranchType.HP },
+    { targetId: "airdramon", branchType: BranchType.HP },
     { targetId: "gaogamon", branchType: BranchType.DEF },
     { targetId: "leomon", branchType: BranchType.BALANCED },
   ],
@@ -207,9 +207,9 @@ const veemon: MonsterDefinition = {
   statCaps: { hp: 198, atk: 60, def: 50 },
   evolutionRequirement: { hp: 40, atk: 16, def: 12, bossWorld: 1 },
   evolutionPaths: [
-    { targetId: "xveemon", branchType: BranchType.ATK },
-    { targetId: "greymon", branchType: BranchType.HP },
-    { targetId: "dorugamon", branchType: BranchType.DEF },
+    { targetId: "flamedramon", branchType: BranchType.ATK },
+    { targetId: "xveemon", branchType: BranchType.HP },
+    { targetId: "raidramon", branchType: BranchType.DEF },
     { targetId: "xveemon", branchType: BranchType.BALANCED },
   ],
   description: "青い小竜型モンスター。元気で前向き。バランスの良い成長。",
@@ -241,12 +241,120 @@ const hawkmon: MonsterDefinition = {
   statCaps: { hp: 196, atk: 58, def: 50 },
   evolutionRequirement: { hp: 40, atk: 16, def: 12, bossWorld: 1 },
   evolutionPaths: [
-    { targetId: "aquilamon", branchType: BranchType.ATK },
-    { targetId: "birdramon", branchType: BranchType.HP },
-    { targetId: "dorugamon", branchType: BranchType.DEF },
+    { targetId: "halsemon", branchType: BranchType.ATK },
+    { targetId: "aquilamon", branchType: BranchType.HP },
+    { targetId: "shurimon", branchType: BranchType.DEF },
     { targetId: "aquilamon", branchType: BranchType.BALANCED },
   ],
   description: "鷹型モンスター。礼儀正しく勇敢。バランスの良い能力。",
+  isEnemyOnly: false,
+};
+
+// ========== 敵専用から昇格 ==========
+
+const ogremon: MonsterDefinition = {
+  id: "ogremon",
+  name: "オーガモン",
+  stage: EvolutionStage.ROOKIE,
+  baseStats: { hp: 70, atk: 25, def: 15 },
+  statCaps: { hp: 200, atk: 60, def: 50 },
+  evolutionRequirement: { hp: 40, atk: 16, def: 12, bossWorld: 1 },
+  evolutionPaths: [
+    { targetId: "leomon", branchType: BranchType.ATK },
+    { targetId: "wendimon", branchType: BranchType.HP },
+    { targetId: "devimon", branchType: BranchType.DEF },
+    { targetId: "growlmon", branchType: BranchType.BALANCED },
+  ],
+  description: "巨大な骨のこん棒を振るう鬼型モンスター。パワー型の成長期。",
+  isEnemyOnly: false,
+};
+
+const darktyranomon: MonsterDefinition = {
+  id: "darktyranomon",
+  name: "ダークティラノモン",
+  stage: EvolutionStage.ROOKIE,
+  baseStats: { hp: 80, atk: 28, def: 18 },
+  statCaps: { hp: 200, atk: 60, def: 50 },
+  evolutionRequirement: { hp: 40, atk: 16, def: 12, bossWorld: 1 },
+  evolutionPaths: [
+    { targetId: "tyrannomon", branchType: BranchType.HP },
+    { targetId: "megidramon", branchType: BranchType.ATK },
+    { targetId: "garurumon", branchType: BranchType.DEF },
+    { targetId: "growlmon", branchType: BranchType.BALANCED },
+  ],
+  description: "ウイルスに侵された恐竜型モンスター。ウイルス恐竜系統。",
+  isEnemyOnly: false,
+};
+
+// ========== 02世代 ==========
+
+const armadimon: MonsterDefinition = {
+  id: "armadimon",
+  name: "アルマジモン",
+  stage: EvolutionStage.ROOKIE,
+  baseStats: { hp: 68, atk: 17, def: 19 },
+  statCaps: { hp: 210, atk: 52, def: 55 },
+  evolutionRequirement: { hp: 40, atk: 16, def: 12, bossWorld: 1 },
+  evolutionPaths: [
+    { targetId: "ankylomon", branchType: BranchType.HP },
+    { targetId: "submarimon", branchType: BranchType.DEF },
+    { targetId: "digmon", branchType: BranchType.ATK },
+    { targetId: "ankylomon", branchType: BranchType.BALANCED },
+  ],
+  description: "アルマジロ型モンスター。防御力に優れ穴掘りが得意。02パートナー(伊織)。",
+  isEnemyOnly: false,
+};
+
+const plotmon: MonsterDefinition = {
+  id: "plotmon",
+  name: "プロットモン",
+  stage: EvolutionStage.ROOKIE,
+  baseStats: { hp: 62, atk: 19, def: 17 },
+  statCaps: { hp: 200, atk: 56, def: 52 },
+  evolutionRequirement: { hp: 40, atk: 16, def: 12, bossWorld: 1 },
+  evolutionPaths: [
+    { targetId: "tailmon", branchType: BranchType.HP },
+    { targetId: "tailmon", branchType: BranchType.BALANCED },
+    { targetId: "seasarmon", branchType: BranchType.DEF },
+    { targetId: "leomon", branchType: BranchType.ATK },
+  ],
+  description: "子犬型の聖獣モンスター。テイルモンの前段階。02パートナー(ヒカリ)。",
+  isEnemyOnly: false,
+};
+
+// ========== 冒険世代/系統補完 ==========
+
+const hagurumon: MonsterDefinition = {
+  id: "hagurumon",
+  name: "ハグルモン",
+  stage: EvolutionStage.ROOKIE,
+  baseStats: { hp: 58, atk: 20, def: 18 },
+  statCaps: { hp: 195, atk: 55, def: 52 },
+  evolutionRequirement: { hp: 40, atk: 16, def: 12, bossWorld: 1 },
+  evolutionPaths: [
+    { targetId: "gaogamon", branchType: BranchType.ATK },
+    { targetId: "dorugamon", branchType: BranchType.HP },
+    { targetId: "stingmon", branchType: BranchType.DEF },
+    { targetId: "xveemon", branchType: BranchType.BALANCED },
+  ],
+  description: "歯車型の機械モンスター。マシン系統の根。ムゲンドラモンへの道を拓く。",
+  isEnemyOnly: false,
+};
+
+const kotemon: MonsterDefinition = {
+  id: "kotemon",
+  name: "コテモン",
+  stage: EvolutionStage.ROOKIE,
+  baseStats: { hp: 60, atk: 23, def: 15 },
+  statCaps: { hp: 190, atk: 60, def: 48 },
+  evolutionRequirement: { hp: 40, atk: 16, def: 12, bossWorld: 1 },
+  evolutionPaths: [
+    { targetId: "leomon", branchType: BranchType.ATK },
+    { targetId: "angemon", branchType: BranchType.HP },
+    { targetId: "wizardmon", branchType: BranchType.DEF },
+    { targetId: "greymon", branchType: BranchType.BALANCED },
+  ],
+  description: "剣道の防具を纏った剣士型モンスター。剣士系統。",
   isEnemyOnly: false,
 };
 
@@ -266,4 +374,10 @@ export const ROOKIE_MONSTERS: readonly MonsterDefinition[] = [
   veemon,
   wormmon,
   hawkmon,
+  ogremon,
+  darktyranomon,
+  armadimon,
+  plotmon,
+  hagurumon,
+  kotemon,
 ] as const;

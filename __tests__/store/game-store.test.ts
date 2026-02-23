@@ -1,7 +1,7 @@
 /**
  * game-store のテスト
  *
- * resetForRebirth アクションの動作を検証する。
+ * resetForRebirth, baseTp, addBaseTp, allocateBaseTp の動作を検証する。
  */
 
 import { useGameStore, INITIAL_BONUS_WP } from "../../src/store/game-store";
@@ -76,5 +76,69 @@ describe("game-store resetForRebirth", () => {
     useGameStore.getState().resetForRebirth("2026-02-23");
 
     expect(useGameStore.getState().lastRideMetricsFetch).toBe(fetchTime);
+  });
+
+  it("should reset baseTp to 0", () => {
+    useGameStore.getState().addBaseTp(50);
+    expect(useGameStore.getState().baseTp).toBe(50);
+
+    useGameStore.getState().resetForRebirth("2026-02-23");
+
+    expect(useGameStore.getState().baseTp).toBe(0);
+  });
+});
+
+describe("game-store baseTp", () => {
+  beforeEach(() => {
+    useGameStore.getState().resetGame();
+  });
+
+  it("should start at 0", () => {
+    expect(useGameStore.getState().baseTp).toBe(0);
+  });
+
+  it("addBaseTp should accumulate", () => {
+    useGameStore.getState().addBaseTp(10);
+    useGameStore.getState().addBaseTp(5);
+    expect(useGameStore.getState().baseTp).toBe(15);
+  });
+
+  it("allocateBaseTp should transfer to L/M/H and reduce baseTp", () => {
+    useGameStore.getState().addBaseTp(30);
+    useGameStore.getState().allocateBaseTp(10, 10, 10);
+
+    const state = useGameStore.getState();
+    expect(state.baseTp).toBe(0);
+    expect(state.tp.low).toBe(10);
+    expect(state.tp.mid).toBe(10);
+    expect(state.tp.high).toBe(10);
+  });
+
+  it("allocateBaseTp should reject if total exceeds baseTp", () => {
+    useGameStore.getState().addBaseTp(10);
+    useGameStore.getState().allocateBaseTp(5, 5, 5);
+
+    // Should not change since 15 > 10
+    const state = useGameStore.getState();
+    expect(state.baseTp).toBe(10);
+    expect(state.tp.low).toBe(0);
+  });
+
+  it("allocateBaseTp should allow partial allocation", () => {
+    useGameStore.getState().addBaseTp(30);
+    useGameStore.getState().allocateBaseTp(10, 5, 0);
+
+    const state = useGameStore.getState();
+    expect(state.baseTp).toBe(15);
+    expect(state.tp.low).toBe(10);
+    expect(state.tp.mid).toBe(5);
+    expect(state.tp.high).toBe(0);
+  });
+
+  it("allocateBaseTp should reject zero total allocation", () => {
+    useGameStore.getState().addBaseTp(10);
+    useGameStore.getState().allocateBaseTp(0, 0, 0);
+
+    expect(useGameStore.getState().baseTp).toBe(10);
   });
 });

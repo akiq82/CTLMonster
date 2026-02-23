@@ -1,13 +1,24 @@
 /**
  * バトル演出コンポーネント
  *
- * ターン制自動バトルをステップ表示する。
+ * アクション単位でステップ表示する。
+ * 各アクションで攻撃者→命中/回避→ダメージ→HP更新を順番に表示。
  */
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { View, Text, StyleSheet } from "react-native";
-import type { BattleResult, BattleTurn } from "../types/battle";
+import type { BattleResult, BattleFighter } from "../types/battle";
 import { LCD_COLORS } from "./lcd-screen/LcdFrame";
+
+/** ターン内の表示ステップ: 0=ターンヘッダのみ, 1=先攻表示, 2=後攻表示 */
+type ActionStep = 0 | 1 | 2;
+
+/** 先攻表示までの遅延 (ms) */
+const FIRST_ACTION_DELAY = 250;
+/** 後攻表示までの遅延 (先攻表示から, ms) */
+const SECOND_ACTION_DELAY = 1000;
+/** 次ターンへの遷移遅延 (最後のアクション表示から, ms) */
+const NEXT_TURN_DELAY = 1000;
 
 interface BattleAnimationProps {
   /** バトル結果 */
@@ -16,31 +27,37 @@ interface BattleAnimationProps {
   playerName: string;
   /** 敵モンスター名 */
   enemyName: string;
+  /** プレイヤーの初期ステータス */
+  playerFighter: BattleFighter;
+  /** 敵の初期ステータス */
+  enemyFighter: BattleFighter;
   /** バトル完了時コールバック */
   onComplete: () => void;
-  /** 表示速度 (ms per turn) */
-  turnSpeed?: number;
 }
 
 export function BattleAnimation({
   result,
   playerName,
   enemyName,
+  playerFighter,
+  enemyFighter,
   onComplete,
-  turnSpeed = 1200,
 }: BattleAnimationProps) {
   const [currentTurnIndex, setCurrentTurnIndex] = useState(-1);
+  const [actionStep, setActionStep] = useState<ActionStep>(0);
   const [phase, setPhase] = useState<"intro" | "battle" | "result">("intro");
 
+  // Intro → battle 遷移
   useEffect(() => {
-    // Intro phase
     const introTimer = setTimeout(() => {
       setPhase("battle");
       setCurrentTurnIndex(0);
-    }, 1000);
+      setActionStep(0);
+    }, 2000);
     return () => clearTimeout(introTimer);
   }, []);
 
+  // ターン内ステップ進行
   useEffect(() => {
     if (phase !== "battle") return;
     if (currentTurnIndex >= result.turns.length) {
@@ -48,22 +65,82 @@ export function BattleAnimation({
       const resultTimer = setTimeout(onComplete, 2000);
       return () => clearTimeout(resultTimer);
     }
+
+    const turn = result.turns[currentTurnIndex];
+    const actionCount = turn.actions.length;
+
+    if (actionStep === 0) {
+      // ターン開始 → 0.25秒後に先攻表示
+      const timer = setTimeout(() => setActionStep(1), FIRST_ACTION_DELAY);
+      return () => clearTimeout(timer);
+    }
+    if (actionStep === 1 && actionCount >= 2) {
+      // 先攻表示 → 1秒後に後攻表示
+      const timer = setTimeout(() => setActionStep(2), SECOND_ACTION_DELAY);
+      return () => clearTimeout(timer);
+    }
+    // 最後のアクション表示済み → 1秒後に次ターンへ
     const timer = setTimeout(() => {
       setCurrentTurnIndex((i) => i + 1);
-    }, turnSpeed);
+      setActionStep(0);
+    }, NEXT_TURN_DELAY);
     return () => clearTimeout(timer);
-  }, [phase, currentTurnIndex, result.turns.length, turnSpeed, onComplete]);
+  }, [phase, currentTurnIndex, actionStep, result.turns, onComplete]);
 
-  const currentTurn: BattleTurn | undefined = result.turns[currentTurnIndex];
+  const currentTurn = result.turns[currentTurnIndex] ?? null;
+
+  /** 表示済みアクションまでのプレイヤーHP */
+  const currentPlayerHp = useMemo(() => {
+    if (currentTurnIndex < 0) return playerFighter.currentHp;
+    let hp = playerFighter.currentHp;
+    for (let t = 0; t <= currentTurnIndex && t < result.turns.length; t++) {
+      const maxAction = t < currentTurnIndex
+        ? result.turns[t].actions.length
+        : actionStep;
+      for (let a = 0; a < maxAction; a++) {
+        const act = result.turns[t].actions[a];
+        if (act.defenderName === playerName) hp = act.defenderRemainingHp;
+      }
+    }
+    return hp;
+  }, [currentTurnIndex, actionStep, result.turns, playerName, playerFighter.currentHp]);
+
+  /** 表示済みアクションまでの敵HP */
+  const currentEnemyHp = useMemo(() => {
+    if (currentTurnIndex < 0) return enemyFighter.currentHp;
+    let hp = enemyFighter.currentHp;
+    for (let t = 0; t <= currentTurnIndex && t < result.turns.length; t++) {
+      const maxAction = t < currentTurnIndex
+        ? result.turns[t].actions.length
+        : actionStep;
+      for (let a = 0; a < maxAction; a++) {
+        const act = result.turns[t].actions[a];
+        if (act.defenderName === enemyName) hp = act.defenderRemainingHp;
+      }
+    }
+    return hp;
+  }, [currentTurnIndex, actionStep, result.turns, enemyName, enemyFighter.currentHp]);
 
   return (
     <View style={styles.container}>
       {phase === "intro" && (
-        <View style={styles.center}>
+        <View style={styles.introView}>
           <Text style={styles.title}>BATTLE!</Text>
-          <Text style={styles.vs}>
-            {playerName} VS {enemyName}
-          </Text>
+          <View style={styles.fighterRow}>
+            <View style={styles.fighterCard}>
+              <Text style={styles.fighterName}>{playerName}</Text>
+              <Text style={styles.fighterStat}>HP:{playerFighter.maxHp}</Text>
+              <Text style={styles.fighterStat}>ATK:{playerFighter.atk}</Text>
+              <Text style={styles.fighterStat}>DEF:{playerFighter.def}</Text>
+            </View>
+            <Text style={styles.vsText}>VS</Text>
+            <View style={styles.fighterCard}>
+              <Text style={styles.fighterName}>{enemyName}</Text>
+              <Text style={styles.fighterStat}>HP:{enemyFighter.maxHp}</Text>
+              <Text style={styles.fighterStat}>ATK:{enemyFighter.atk}</Text>
+              <Text style={styles.fighterStat}>DEF:{enemyFighter.def}</Text>
+            </View>
+          </View>
         </View>
       )}
 
@@ -72,42 +149,30 @@ export function BattleAnimation({
           <Text style={styles.turnLabel}>
             Turn {currentTurn.turnNumber}
           </Text>
-          {currentTurn.actions.map((action, i) => (
-            <View key={i} style={styles.actionRow}>
-              <Text style={styles.actionText}>
-                {action.attackerName}
+
+          {currentTurn.actions.slice(0, actionStep).map((action, i) => (
+            <View key={i} style={styles.actionDetail}>
+              <Text style={styles.attackerText}>
+                {action.attackerName} →
+              </Text>
+              <Text style={styles.resultText}>
                 {action.hit
-                  ? action.critical
-                    ? ` CRITICAL! ${action.damage}dmg`
-                    : ` ${action.damage}dmg`
-                  : action.evaded
-                    ? " MISS (evaded)"
-                    : " MISS"}
+                  ? action.evaded
+                    ? "MISS (evaded!)"
+                    : action.critical
+                      ? `CRITICAL! ${action.damage}dmg`
+                      : `HIT! ${action.damage}dmg`
+                  : "MISS"}
               </Text>
             </View>
           ))}
+
           <View style={styles.hpRow}>
             <Text style={styles.hpText}>
-              {playerName}: {result.turns.slice(0, currentTurnIndex + 1).reduce(
-                (hp, t) => {
-                  for (const a of t.actions) {
-                    if (a.defenderName === playerName) hp = a.defenderRemainingHp;
-                  }
-                  return hp;
-                },
-                0
-              )}HP
+              {playerName}: {currentPlayerHp}/{playerFighter.maxHp}
             </Text>
             <Text style={styles.hpText}>
-              {enemyName}: {result.turns.slice(0, currentTurnIndex + 1).reduce(
-                (hp, t) => {
-                  for (const a of t.actions) {
-                    if (a.defenderName === enemyName) hp = a.defenderRemainingHp;
-                  }
-                  return hp;
-                },
-                0
-              )}HP
+              {enemyName}: {currentEnemyHp}/{enemyFighter.maxHp}
             </Text>
           </View>
         </View>
@@ -115,7 +180,7 @@ export function BattleAnimation({
 
       {phase === "result" && (
         <View style={styles.center}>
-          <Text style={styles.resultText}>
+          <Text style={styles.resultBig}>
             {result.playerWon ? "WIN!" : "LOSE..."}
           </Text>
           <Text style={styles.subText}>
@@ -132,7 +197,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 12,
   },
-  center: {
+  introView: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
@@ -142,12 +207,40 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     fontFamily: "monospace",
+    marginBottom: 12,
   },
-  vs: {
+  fighterRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  fighterCard: {
+    alignItems: "center",
+    padding: 4,
+  },
+  fighterName: {
+    color: LCD_COLORS.DOT,
+    fontSize: 10,
+    fontWeight: "bold",
+    fontFamily: "monospace",
+    marginBottom: 2,
+  },
+  fighterStat: {
+    color: LCD_COLORS.DOT_LIGHT,
+    fontSize: 9,
+    fontFamily: "monospace",
+  },
+  vsText: {
     color: LCD_COLORS.DOT_LIGHT,
     fontSize: 11,
     fontFamily: "monospace",
-    marginTop: 8,
+    marginHorizontal: 4,
+  },
+  center: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
   battleView: {
     flex: 1,
@@ -158,14 +251,21 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: "bold",
     fontFamily: "monospace",
-    marginBottom: 4,
+    marginBottom: 8,
   },
-  actionRow: {
-    marginVertical: 2,
+  actionDetail: {
+    marginBottom: 12,
   },
-  actionText: {
+  attackerText: {
     color: LCD_COLORS.DOT,
-    fontSize: 9,
+    fontSize: 10,
+    fontWeight: "bold",
+    fontFamily: "monospace",
+    marginBottom: 2,
+  },
+  resultText: {
+    color: LCD_COLORS.DOT,
+    fontSize: 11,
     fontFamily: "monospace",
   },
   hpRow: {
@@ -178,7 +278,7 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontFamily: "monospace",
   },
-  resultText: {
+  resultBig: {
     color: LCD_COLORS.DOT,
     fontSize: 20,
     fontWeight: "bold",

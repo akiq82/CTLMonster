@@ -14,7 +14,7 @@ import type { TrainingMenuDefinition, TrainingResult } from "../types/training";
 import type { MonsterState, MonsterDefinition } from "../types/monster";
 import { MEAL_TRAINING_BONUS } from "../types/training";
 import { MONSTER_DEFINITIONS } from "../data/monsters";
-import { randomInt, type RngFn } from "../utils/random";
+import { randomDecimal, type RngFn } from "../utils/random";
 
 /**
  * トレーニング実行可否を判定する
@@ -48,14 +48,14 @@ export function executeTraining(
   hasMealBonus: boolean,
   rng: RngFn = Math.random
 ): TrainingResult {
-  let hpGain = randomInt(menu.hpGain.min, menu.hpGain.max, rng);
-  let atkGain = randomInt(menu.atkGain.min, menu.atkGain.max, rng);
-  let defGain = randomInt(menu.defGain.min, menu.defGain.max, rng);
+  let hpGain = randomDecimal(menu.hpGain.min, menu.hpGain.max, 0.1, rng);
+  let atkGain = randomDecimal(menu.atkGain.min, menu.atkGain.max, 0.1, rng);
+  let defGain = randomDecimal(menu.defGain.min, menu.defGain.max, 0.1, rng);
 
   if (hasMealBonus) {
-    hpGain = Math.ceil(hpGain * MEAL_TRAINING_BONUS);
-    atkGain = Math.ceil(atkGain * MEAL_TRAINING_BONUS);
-    defGain = Math.ceil(defGain * MEAL_TRAINING_BONUS);
+    hpGain = Math.round(hpGain * MEAL_TRAINING_BONUS * 10) / 10;
+    atkGain = Math.round(atkGain * MEAL_TRAINING_BONUS * 10) / 10;
+    defGain = Math.round(defGain * MEAL_TRAINING_BONUS * 10) / 10;
   }
 
   return {

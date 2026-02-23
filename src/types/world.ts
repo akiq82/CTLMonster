@@ -39,7 +39,7 @@ export interface BossDefinition {
 
 /** ワールド定義 */
 export interface WorldDefinition {
-  /** ワールド番号 (1-8) */
+  /** ワールド番号 (1-10) */
   readonly worldNumber: number;
   /** ワールド名 */
   readonly name: string;
@@ -68,5 +68,5 @@ export const WORLD_CONSTANTS = {
   /** ボス到達に必要な撃破数 */
   REQUIRED_KILLS: 10,
   /** 全ワールド数 */
-  TOTAL_WORLDS: 8,
+  TOTAL_WORLDS: 10,
 } as const;

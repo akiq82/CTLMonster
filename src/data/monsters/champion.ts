@@ -19,9 +19,9 @@ const greymon: MonsterDefinition = {
   statCaps: { hp: 500, atk: 140, def: 120 },
   evolutionRequirement: { hp: 130, atk: 40, def: 30, bossWorld: 2 },
   evolutionPaths: [
-    { targetId: "holyangemon", branchType: BranchType.HP },
-    { targetId: "weregarurumon", branchType: BranchType.DEF },
-    { targetId: "megalogreymon", branchType: BranchType.ATK },
+    { targetId: "metalgreymon_virus", branchType: BranchType.HP },
+    { targetId: "skullgreymon", branchType: BranchType.ATK },
+    { targetId: "megalogreymon", branchType: BranchType.DEF },
     { targetId: "megalogreymon", branchType: BranchType.BALANCED },
   ],
   description:
@@ -72,9 +72,9 @@ const angemon: MonsterDefinition = {
   evolutionRequirement: { hp: 130, atk: 40, def: 30, bossWorld: 2 },
   evolutionPaths: [
     { targetId: "holyangemon", branchType: BranchType.HP },
-    { targetId: "holyangemon", branchType: BranchType.BALANCED },
+    { targetId: "angewomon", branchType: BranchType.BALANCED },
     { targetId: "phantomon", branchType: BranchType.ATK },
-    { targetId: "weregarurumon", branchType: BranchType.DEF },
+    { targetId: "shakkoumon", branchType: BranchType.DEF },
   ],
   description: "天使型モンスター。聖なる力で敵を浄化する。HP型の上位進化。",
   isEnemyOnly: false,
@@ -89,8 +89,8 @@ const devimon: MonsterDefinition = {
   evolutionRequirement: { hp: 130, atk: 40, def: 30, bossWorld: 2 },
   evolutionPaths: [
     { targetId: "phantomon", branchType: BranchType.ATK },
-    { targetId: "phantomon", branchType: BranchType.HP },
-    { targetId: "cyberdramon", branchType: BranchType.DEF },
+    { targetId: "skullgreymon", branchType: BranchType.HP },
+    { targetId: "mammothmon", branchType: BranchType.DEF },
     { targetId: "megalogreymon", branchType: BranchType.BALANCED },
   ],
   description: "堕天使型モンスター。闇の力を操る。ステ不足時の妥協進化。",
@@ -105,9 +105,9 @@ const icedevimon: MonsterDefinition = {
   statCaps: { hp: 470, atk: 135, def: 125 },
   evolutionRequirement: { hp: 130, atk: 40, def: 30, bossWorld: 2 },
   evolutionPaths: [
-    { targetId: "cyberdramon", branchType: BranchType.DEF },
-    { targetId: "cyberdramon", branchType: BranchType.ATK },
-    { targetId: "phantomon", branchType: BranchType.HP },
+    { targetId: "mammothmon", branchType: BranchType.DEF },
+    { targetId: "datamon", branchType: BranchType.ATK },
+    { targetId: "metalgreymon_virus", branchType: BranchType.HP },
     { targetId: "weregarurumon", branchType: BranchType.BALANCED },
   ],
   description: "氷の堕天使型モンスター。冷気と闇の力を操る。ステ不足時の妥協進化。",
@@ -122,9 +122,9 @@ const megidramon: MonsterDefinition = {
   statCaps: { hp: 440, atk: 155, def: 105 },
   evolutionRequirement: { hp: 130, atk: 40, def: 30, bossWorld: 2 },
   evolutionPaths: [
-    { targetId: "megalogreymon", branchType: BranchType.ATK },
-    { targetId: "cyberdramon", branchType: BranchType.DEF },
-    { targetId: "phantomon", branchType: BranchType.HP },
+    { targetId: "megadramon", branchType: BranchType.ATK },
+    { targetId: "gigadramon", branchType: BranchType.DEF },
+    { targetId: "skullgreymon", branchType: BranchType.HP },
     { targetId: "megalogreymon", branchType: BranchType.BALANCED },
   ],
   description: "暴走した邪竜型モンスター。破壊衝動に突き動かされる。ステ不足時の妥協進化。",
@@ -259,8 +259,8 @@ const xveemon: MonsterDefinition = {
   evolutionRequirement: { hp: 130, atk: 40, def: 30, bossWorld: 2 },
   evolutionPaths: [
     { targetId: "paildramon", branchType: BranchType.ATK },
-    { targetId: "rizegreymon", branchType: BranchType.HP },
-    { targetId: "machgaogamon", branchType: BranchType.DEF },
+    { targetId: "kimeramon", branchType: BranchType.HP },
+    { targetId: "infermon", branchType: BranchType.DEF },
     { targetId: "paildramon", branchType: BranchType.BALANCED },
   ],
   description: "大型竜人型モンスター。胸のXマークからエネルギー弾を放つ。バランス型。",
@@ -352,6 +352,214 @@ const dorugamon: MonsterDefinition = {
   isEnemyOnly: false,
 };
 
+// ========== 02世代 ==========
+
+const ankylomon: MonsterDefinition = {
+  id: "ankylomon",
+  name: "アンキロモン",
+  stage: EvolutionStage.CHAMPION,
+  baseStats: { hp: 165, atk: 40, def: 42 },
+  statCaps: { hp: 510, atk: 128, def: 130 },
+  evolutionRequirement: { hp: 130, atk: 40, def: 30, bossWorld: 2 },
+  evolutionPaths: [
+    { targetId: "mammothmon", branchType: BranchType.HP },
+    { targetId: "chirinmon", branchType: BranchType.DEF },
+    { targetId: "rizegreymon", branchType: BranchType.ATK },
+    { targetId: "silphymon", branchType: BranchType.BALANCED },
+  ],
+  description: "アンキロサウルス型モンスター。鉄壁の甲羅と鉄球の尾を持つ。DEF偏重。",
+  isEnemyOnly: false,
+};
+
+const tailmon: MonsterDefinition = {
+  id: "tailmon",
+  name: "テイルモン",
+  stage: EvolutionStage.CHAMPION,
+  baseStats: { hp: 148, atk: 46, def: 38 },
+  statCaps: { hp: 475, atk: 138, def: 124 },
+  evolutionRequirement: { hp: 130, atk: 40, def: 30, bossWorld: 2 },
+  evolutionPaths: [
+    { targetId: "angewomon", branchType: BranchType.HP },
+    { targetId: "angewomon", branchType: BranchType.BALANCED },
+    { targetId: "myotismon", branchType: BranchType.ATK },
+    { targetId: "ladydevimon", branchType: BranchType.DEF },
+  ],
+  description: "聖なる猫型モンスター。ヒカリのパートナー。敏捷で攻撃力も高い。",
+  isEnemyOnly: false,
+};
+
+const flamedramon: MonsterDefinition = {
+  id: "flamedramon",
+  name: "フレイドラモン",
+  stage: EvolutionStage.CHAMPION,
+  baseStats: { hp: 150, atk: 50, def: 32 },
+  statCaps: { hp: 470, atk: 148, def: 110 },
+  evolutionRequirement: { hp: 130, atk: 40, def: 30, bossWorld: 2 },
+  evolutionPaths: [
+    { targetId: "megalogreymon", branchType: BranchType.ATK },
+    { targetId: "paildramon", branchType: BranchType.HP },
+    { targetId: "cyberdramon", branchType: BranchType.DEF },
+    { targetId: "rizegreymon", branchType: BranchType.BALANCED },
+  ],
+  description: "ブイモンのアーマー進化(勇気)。炎を纏った竜戦士。ATK特化。",
+  isEnemyOnly: false,
+};
+
+const raidramon: MonsterDefinition = {
+  id: "raidramon",
+  name: "ライドラモン",
+  stage: EvolutionStage.CHAMPION,
+  baseStats: { hp: 152, atk: 44, def: 38 },
+  statCaps: { hp: 480, atk: 136, def: 122 },
+  evolutionRequirement: { hp: 130, atk: 40, def: 30, bossWorld: 2 },
+  evolutionPaths: [
+    { targetId: "paildramon", branchType: BranchType.DEF },
+    { targetId: "machgaogamon", branchType: BranchType.ATK },
+    { targetId: "weregarurumon", branchType: BranchType.HP },
+    { targetId: "cyberdramon", branchType: BranchType.BALANCED },
+  ],
+  description: "ブイモンのアーマー進化(友情)。電撃を纏った獣型。DEF偏重。",
+  isEnemyOnly: false,
+};
+
+const digmon: MonsterDefinition = {
+  id: "digmon",
+  name: "ディグモン",
+  stage: EvolutionStage.CHAMPION,
+  baseStats: { hp: 158, atk: 43, def: 40 },
+  statCaps: { hp: 490, atk: 132, def: 128 },
+  evolutionRequirement: { hp: 130, atk: 40, def: 30, bossWorld: 2 },
+  evolutionPaths: [
+    { targetId: "mammothmon", branchType: BranchType.DEF },
+    { targetId: "datamon", branchType: BranchType.ATK },
+    { targetId: "lilamon", branchType: BranchType.HP },
+    { targetId: "chirinmon", branchType: BranchType.BALANCED },
+  ],
+  description: "アルマジモンのアーマー進化(知識)。ドリル腕で地中を掘り進む。DEF偏重。",
+  isEnemyOnly: false,
+};
+
+const halsemon: MonsterDefinition = {
+  id: "halsemon",
+  name: "ホルスモン",
+  stage: EvolutionStage.CHAMPION,
+  baseStats: { hp: 150, atk: 44, def: 37 },
+  statCaps: { hp: 478, atk: 136, def: 120 },
+  evolutionRequirement: { hp: 130, atk: 40, def: 30, bossWorld: 2 },
+  evolutionPaths: [
+    { targetId: "silphymon", branchType: BranchType.ATK },
+    { targetId: "taomon", branchType: BranchType.DEF },
+    { targetId: "rizegreymon", branchType: BranchType.HP },
+    { targetId: "silphymon", branchType: BranchType.BALANCED },
+  ],
+  description: "ホークモンのアーマー進化(愛情)。鷲獅子型の飛行モンスター。バランス型。",
+  isEnemyOnly: false,
+};
+
+const shurimon: MonsterDefinition = {
+  id: "shurimon",
+  name: "シュリモン",
+  stage: EvolutionStage.CHAMPION,
+  baseStats: { hp: 142, atk: 48, def: 34 },
+  statCaps: { hp: 460, atk: 142, def: 112 },
+  evolutionRequirement: { hp: 130, atk: 40, def: 30, bossWorld: 2 },
+  evolutionPaths: [
+    { targetId: "phantomon", branchType: BranchType.ATK },
+    { targetId: "machgaogamon", branchType: BranchType.HP },
+    { targetId: "taomon", branchType: BranchType.DEF },
+    { targetId: "paildramon", branchType: BranchType.BALANCED },
+  ],
+  description: "ホークモンのアーマー進化(純真)。忍者型の素早いモンスター。ATK偏重。",
+  isEnemyOnly: false,
+};
+
+const submarimon: MonsterDefinition = {
+  id: "submarimon",
+  name: "サブマリモン",
+  stage: EvolutionStage.CHAMPION,
+  baseStats: { hp: 160, atk: 40, def: 42 },
+  statCaps: { hp: 505, atk: 126, def: 130 },
+  evolutionRequirement: { hp: 130, atk: 40, def: 30, bossWorld: 2 },
+  evolutionPaths: [
+    { targetId: "mammothmon", branchType: BranchType.HP },
+    { targetId: "datamon", branchType: BranchType.DEF },
+    { targetId: "megadramon", branchType: BranchType.ATK },
+    { targetId: "chirinmon", branchType: BranchType.BALANCED },
+  ],
+  description: "アルマジモンのアーマー進化(誠実)。潜水艦型。HP/DEF偏重。",
+  isEnemyOnly: false,
+};
+
+// ========== 冒険世代/系統補完 ==========
+
+const tyrannomon: MonsterDefinition = {
+  id: "tyrannomon",
+  name: "ティラノモン",
+  stage: EvolutionStage.CHAMPION,
+  baseStats: { hp: 160, atk: 46, def: 35 },
+  statCaps: { hp: 500, atk: 140, def: 118 },
+  evolutionRequirement: { hp: 130, atk: 40, def: 30, bossWorld: 2 },
+  evolutionPaths: [
+    { targetId: "metaltyranomon", branchType: BranchType.HP },
+    { targetId: "skullgreymon", branchType: BranchType.ATK },
+    { targetId: "mammothmon", branchType: BranchType.DEF },
+    { targetId: "metaltyranomon", branchType: BranchType.BALANCED },
+  ],
+  description: "恐竜の原点。ダークティラノモンの正統進化元。バランスの良い恐竜型。",
+  isEnemyOnly: false,
+};
+
+const seadramon: MonsterDefinition = {
+  id: "seadramon",
+  name: "シードラモン",
+  stage: EvolutionStage.CHAMPION,
+  baseStats: { hp: 155, atk: 43, def: 38 },
+  statCaps: { hp: 488, atk: 134, def: 124 },
+  evolutionRequirement: { hp: 130, atk: 40, def: 30, bossWorld: 2 },
+  evolutionPaths: [
+    { targetId: "megaseadramon", branchType: BranchType.ATK },
+    { targetId: "megaseadramon", branchType: BranchType.HP },
+    { targetId: "mammothmon", branchType: BranchType.DEF },
+    { targetId: "cyberdramon", branchType: BranchType.BALANCED },
+  ],
+  description: "海竜型モンスター。メタルシードラモンへの道を拓く。水棲系統の中核。",
+  isEnemyOnly: false,
+};
+
+const airdramon: MonsterDefinition = {
+  id: "airdramon",
+  name: "エアドラモン",
+  stage: EvolutionStage.CHAMPION,
+  baseStats: { hp: 148, atk: 47, def: 34 },
+  statCaps: { hp: 472, atk: 140, def: 116 },
+  evolutionRequirement: { hp: 130, atk: 40, def: 30, bossWorld: 2 },
+  evolutionPaths: [
+    { targetId: "megadramon", branchType: BranchType.ATK },
+    { targetId: "rizegreymon", branchType: BranchType.HP },
+    { targetId: "gigadramon", branchType: BranchType.DEF },
+    { targetId: "skullgreymon", branchType: BranchType.BALANCED },
+  ],
+  description: "翼竜型モンスター。飛竜系統の中核。空中戦が得意。",
+  isEnemyOnly: false,
+};
+
+const kuwagamon: MonsterDefinition = {
+  id: "kuwagamon",
+  name: "クワガーモン",
+  stage: EvolutionStage.CHAMPION,
+  baseStats: { hp: 146, atk: 49, def: 33 },
+  statCaps: { hp: 465, atk: 145, def: 112 },
+  evolutionRequirement: { hp: 130, atk: 40, def: 30, bossWorld: 2 },
+  evolutionPaths: [
+    { targetId: "datamon", branchType: BranchType.ATK },
+    { targetId: "skullgreymon", branchType: BranchType.HP },
+    { targetId: "metalgreymon_virus", branchType: BranchType.DEF },
+    { targetId: "gigadramon", branchType: BranchType.BALANCED },
+  ],
+  description: "巨大クワガタ型モンスター。グランクワガーモンへ繋がる昆虫系統。ATK偏重。",
+  isEnemyOnly: false,
+};
+
 /** 成熟期 モンスター一覧 */
 export const CHAMPION_MONSTERS: readonly MonsterDefinition[] = [
   greymon,
@@ -374,4 +582,16 @@ export const CHAMPION_MONSTERS: readonly MonsterDefinition[] = [
   seasarmon,
   sangloupmon,
   dorugamon,
+  ankylomon,
+  tailmon,
+  flamedramon,
+  raidramon,
+  digmon,
+  halsemon,
+  shurimon,
+  submarimon,
+  tyrannomon,
+  seadramon,
+  airdramon,
+  kuwagamon,
 ] as const;

@@ -63,7 +63,7 @@ export const MONSTER_DEFINITIONS: ReadonlyMap<string, MonsterDefinition> =
   );
 
 /** 初期モンスター（卵から孵化する幼年期I）のIDリスト */
-export const STARTER_MONSTER_IDS = ["botamon", "punimon"] as const;
+export const STARTER_MONSTER_IDS = ["botamon", "punimon", "chibomon"] as const;
 
 /**
  * 段階別ステータス基準テーブル（GDD 6.1）

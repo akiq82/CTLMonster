@@ -9,6 +9,7 @@ import { useEffect, useRef } from "react";
 import { useGameStore } from "../store/game-store";
 import { useMonsterStore } from "../store/monster-store";
 import { useSettingsStore } from "../store/settings-store";
+import { useEncyclopediaStore } from "../store/encyclopedia-store";
 import { executeDailySync } from "../services/daily-sync";
 
 /**
@@ -24,6 +25,7 @@ export function useDailySync() {
   const lastSyncDate = useGameStore((s) => s.lastSyncDate);
   const processedWorkoutKeys = useGameStore((s) => s.processedWorkoutKeys);
   const addTp = useGameStore((s) => s.addTp);
+  const addBaseTp = useGameStore((s) => s.addBaseTp);
   const addWp = useGameStore((s) => s.addWp);
   const markDailyBonusApplied = useGameStore((s) => s.markDailyBonusApplied);
   const markWorkoutProcessed = useGameStore((s) => s.markWorkoutProcessed);
@@ -45,7 +47,8 @@ export function useDailySync() {
     if (phase !== "alive" || !monster) return;
 
     const today = getTodayString();
-    if (lastSyncDate === today) return;
+    const dailyBonusApplied = useGameStore.getState().dailyBonusApplied;
+    if (lastSyncDate === today && dailyBonusApplied) return;
     if (syncingRef.current) return;
 
     syncingRef.current = true;
@@ -59,8 +62,9 @@ export function useDailySync() {
       monster.bornAt
     )
       .then((result) => {
-        // PMCボーナスTP付与
-        addTp(result.pmcBonusTp);
+        // PMCボーナスをベースTPプールに加算
+        const pmcTotal = (result.pmcBonusTp.low ?? 0) + (result.pmcBonusTp.mid ?? 0) + (result.pmcBonusTp.high ?? 0);
+        addBaseTp(pmcTotal);
 
         // ワークアウトTP付与
         if (result.workoutTp.low > 0 || result.workoutTp.mid > 0 || result.workoutTp.high > 0) {
@@ -91,6 +95,15 @@ export function useDailySync() {
         // 同期日マーク
         markDailyBonusApplied(today);
         updateLastLogin();
+
+        // DailyLog 記録
+        const totalWp = result.rideWp + result.rescuedWp;
+        const updateDailyLog = useEncyclopediaStore.getState().updateDailyLog;
+        updateDailyLog(today, {
+          wpGained: totalWp,
+          tpGained: result.workoutTp,
+          baseTpGained: pmcTotal,
+        });
       })
       .catch(() => {
         // 同期失敗時はデフォルト値でフォールバック実行

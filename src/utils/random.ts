@@ -61,6 +61,25 @@ export function randomPick<T>(array: readonly T[], rng: RngFn = Math.random): T 
   return array[Math.floor(rng() * array.length)];
 }
 
+/**
+ * 指定精度のランダム小数を返す (min〜max, precision刻み)
+ *
+ * @param min - 最小値（含む）
+ * @param max - 最大値（含む）
+ * @param precision - 刻み幅 (例: 0.1)
+ * @param rng - 乱数生成関数
+ */
+export function randomDecimal(
+  min: number,
+  max: number,
+  precision: number = 0.1,
+  rng: RngFn = Math.random
+): number {
+  const steps = Math.round((max - min) / precision);
+  const step = Math.floor(rng() * (steps + 1));
+  return Math.round((min + step * precision) * 10) / 10;
+}
+
 /** 重み付きバケット定義 */
 export interface WeightedBucket {
   /** バケット下限 (含む) */

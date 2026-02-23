@@ -46,6 +46,8 @@ interface GameState {
   lastDeathCheckDate: string;
   /** 最終RideMetrics取得日時 (ISO string) */
   lastRideMetricsFetch: string;
+  /** ベースTPプール (PMCボーナス + バトルXP) */
+  baseTp: number;
 }
 
 interface GameActions {
@@ -73,6 +75,10 @@ interface GameActions {
   markDeathChecked: (date: string) => void;
   /** RideMetrics取得日時を更新する */
   updateRideMetricsFetch: () => void;
+  /** ベースTPを加算する */
+  addBaseTp: (amount: number) => void;
+  /** ベースTPをL/M/Hに配分する */
+  allocateBaseTp: (toL: number, toM: number, toH: number) => void;
   /** 転生時にTP/WP/エンカウント等をリセットする（モンスター誕生日基準） */
   resetForRebirth: (bornDate: string) => void;
   /** ゲームをリセットする（新規開始用） */
@@ -91,6 +97,7 @@ const initialState: GameState = {
   processedWorkoutKeys: [],
   lastDeathCheckDate: "",
   lastRideMetricsFetch: "",
+  baseTp: 0,
 };
 
 export const useGameStore = create<GameState & GameActions>()(
@@ -154,6 +161,23 @@ export const useGameStore = create<GameState & GameActions>()(
       updateRideMetricsFetch: () =>
         set({ lastRideMetricsFetch: new Date().toISOString() }),
 
+      addBaseTp: (amount) =>
+        set((state) => ({ baseTp: state.baseTp + amount })),
+
+      allocateBaseTp: (toL, toM, toH) =>
+        set((state) => {
+          const total = toL + toM + toH;
+          if (total > state.baseTp || total <= 0) return state;
+          return {
+            baseTp: state.baseTp - total,
+            tp: {
+              low: state.tp.low + toL,
+              mid: state.tp.mid + toM,
+              high: state.tp.high + toH,
+            },
+          };
+        }),
+
       resetForRebirth: (bornDate) =>
         set({
           tp: { low: 0, mid: 0, high: 0 },
@@ -163,6 +187,7 @@ export const useGameStore = create<GameState & GameActions>()(
           lastSyncDate: bornDate,
           dailyBonusApplied: false,
           lastDeathCheckDate: "",
+          baseTp: 0,
         }),
 
       resetGame: () => set(initialState),

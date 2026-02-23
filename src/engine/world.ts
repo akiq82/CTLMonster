@@ -5,7 +5,7 @@
  *
  * - 各ワールド: 15体モブ撃破 → ボス戦
  * - 一度クリアしたワールドの次のワールドを選択可能
- * - 全8ワールド
+ * - 全10ワールド
  */
 
 import type { WorldProgress, WorldDefinition } from "../types/world";
@@ -90,7 +90,7 @@ export function getAvailableWorlds(
 /**
  * 指定ワールドの定義を取得する
  *
- * @param worldNumber - ワールド番号 (1-8)
+ * @param worldNumber - ワールド番号 (1-10)
  * @returns ワールド定義
  * @throws ワールドが見つからない場合
  */

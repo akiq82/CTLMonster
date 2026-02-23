@@ -1,5 +1,5 @@
 /**
- * 敵専用モンスター定義（W1-W2用）
+ * 敵専用モンスター定義
  *
  * プレイヤーが育成することはできない。ワールドの雑魚敵・ボスとして登場する。
  */
@@ -9,17 +9,7 @@ import {
   EvolutionStage,
 } from "../../types/monster";
 
-const goblimon: MonsterDefinition = {
-  id: "goblimon",
-  name: "ゴブリモン",
-  stage: EvolutionStage.BABY_II,
-  baseStats: { hp: 20, atk: 8, def: 5 },
-  statCaps: { hp: 80, atk: 25, def: 20 },
-  evolutionRequirement: null,
-  evolutionPaths: [],
-  description: "こん棒を振り回す小鬼型モンスター。W1の雑魚敵。",
-  isEnemyOnly: true,
-};
+// ========== W1-W2 level (Baby II / Rookie) ==========
 
 const gazimon: MonsterDefinition = {
   id: "gazimon",
@@ -33,56 +23,6 @@ const gazimon: MonsterDefinition = {
   isEnemyOnly: true,
 };
 
-const ogremon: MonsterDefinition = {
-  id: "ogremon",
-  name: "オーガモン",
-  stage: EvolutionStage.ROOKIE,
-  baseStats: { hp: 70, atk: 25, def: 15 },
-  statCaps: { hp: 200, atk: 60, def: 50 },
-  evolutionRequirement: null,
-  evolutionPaths: [],
-  description: "巨大な骨のこん棒を振るう鬼型モンスター。W1のボスとして立ちはだかる。",
-  isEnemyOnly: true,
-};
-
-const darktyranomon: MonsterDefinition = {
-  id: "darktyranomon",
-  name: "ダークティラノモン",
-  stage: EvolutionStage.ROOKIE,
-  baseStats: { hp: 80, atk: 28, def: 18 },
-  statCaps: { hp: 200, atk: 60, def: 50 },
-  evolutionRequirement: null,
-  evolutionPaths: [],
-  description: "ウイルスに侵された恐竜型モンスター。W2のモブ敵。",
-  isEnemyOnly: true,
-};
-
-const cyclonemon: MonsterDefinition = {
-  id: "cyclonemon",
-  name: "サイクロモン",
-  stage: EvolutionStage.ROOKIE,
-  baseStats: { hp: 75, atk: 26, def: 16 },
-  statCaps: { hp: 200, atk: 60, def: 50 },
-  evolutionRequirement: null,
-  evolutionPaths: [],
-  description: "一つ目の竜型モンスター。炎の腕で攻撃する。",
-  isEnemyOnly: true,
-};
-
-const tuskmon: MonsterDefinition = {
-  id: "tuskmon",
-  name: "タスクモン",
-  stage: EvolutionStage.CHAMPION,
-  baseStats: { hp: 180, atk: 45, def: 35 },
-  statCaps: { hp: 500, atk: 140, def: 120 },
-  evolutionRequirement: null,
-  evolutionPaths: [],
-  description: "巨大な牙を持つ恐竜型モンスター。W2のボスとして立ちはだかる。",
-  isEnemyOnly: true,
-};
-
-// ========== W1-W2 level (Baby II / Rookie stage stats) ==========
-
 const mushroomon: MonsterDefinition = {
   id: "mushroomon",
   name: "マッシュモン",
@@ -95,15 +35,15 @@ const mushroomon: MonsterDefinition = {
   isEnemyOnly: true,
 };
 
-const kunemon: MonsterDefinition = {
-  id: "kunemon",
-  name: "クネモン",
-  stage: EvolutionStage.BABY_II,
-  baseStats: { hp: 18, atk: 9, def: 5 },
-  statCaps: { hp: 80, atk: 25, def: 20 },
+const cyclonemon: MonsterDefinition = {
+  id: "cyclonemon",
+  name: "サイクロモン",
+  stage: EvolutionStage.ROOKIE,
+  baseStats: { hp: 75, atk: 26, def: 16 },
+  statCaps: { hp: 200, atk: 60, def: 50 },
   evolutionRequirement: null,
   evolutionPaths: [],
-  description: "電気を帯びた芋虫型モンスター。痺れる糸を吐く。",
+  description: "一つ目の竜型モンスター。炎の腕で攻撃する。",
   isEnemyOnly: true,
 };
 
@@ -143,7 +83,19 @@ const gizamon: MonsterDefinition = {
   isEnemyOnly: true,
 };
 
-// ========== W3-W4 level (Rookie / Champion stage stats) ==========
+// ========== W3-W4 level (Champion) ==========
+
+const tuskmon: MonsterDefinition = {
+  id: "tuskmon",
+  name: "タスクモン",
+  stage: EvolutionStage.CHAMPION,
+  baseStats: { hp: 180, atk: 45, def: 35 },
+  statCaps: { hp: 500, atk: 140, def: 120 },
+  evolutionRequirement: null,
+  evolutionPaths: [],
+  description: "巨大な牙を持つ恐竜型モンスター。W2のボスとして立ちはだかる。",
+  isEnemyOnly: true,
+};
 
 const minotauromon: MonsterDefinition = {
   id: "minotauromon",
@@ -241,79 +193,83 @@ const monochromon: MonsterDefinition = {
   isEnemyOnly: true,
 };
 
-// ========== W5-W6 level (Champion / Ultimate stage stats) ==========
+// ========== 追加 Rookie ==========
 
-const mammothmon: MonsterDefinition = {
-  id: "mammothmon",
-  name: "マンモン",
-  stage: EvolutionStage.ULTIMATE,
-  baseStats: { hp: 380, atk: 105, def: 88 },
-  statCaps: { hp: 1200, atk: 320, def: 270 },
+const demidevimon: MonsterDefinition = {
+  id: "demidevimon",
+  name: "ピコデビモン",
+  stage: EvolutionStage.ROOKIE,
+  baseStats: { hp: 62, atk: 23, def: 14 },
+  statCaps: { hp: 200, atk: 60, def: 50 },
   evolutionRequirement: null,
   evolutionPaths: [],
-  description: "古代のマンモス型モンスター。氷のブレスで全てを凍てつかせる。",
+  description: "小さな悪魔型モンスター。ずる賢く敵を欺く。",
   isEnemyOnly: true,
 };
 
-const megadramon: MonsterDefinition = {
-  id: "megadramon",
-  name: "メガドラモン",
-  stage: EvolutionStage.ULTIMATE,
-  baseStats: { hp: 360, atk: 115, def: 82 },
-  statCaps: { hp: 1200, atk: 320, def: 270 },
+const betamon: MonsterDefinition = {
+  id: "betamon",
+  name: "ベタモン",
+  stage: EvolutionStage.ROOKIE,
+  baseStats: { hp: 60, atk: 20, def: 16 },
+  statCaps: { hp: 200, atk: 60, def: 50 },
   evolutionRequirement: null,
   evolutionPaths: [],
-  description: "機械化された暗黒竜型。腕のミサイルで攻撃する。W5の雑魚敵。",
+  description: "両生類型モンスター。電撃を放つ水辺の住人。",
   isEnemyOnly: true,
 };
 
-const gigadramon: MonsterDefinition = {
-  id: "gigadramon",
-  name: "ギガドラモン",
-  stage: EvolutionStage.ULTIMATE,
-  baseStats: { hp: 370, atk: 112, def: 85 },
-  statCaps: { hp: 1200, atk: 320, def: 270 },
+// ========== 追加 Champion ==========
+
+const numemon: MonsterDefinition = {
+  id: "numemon",
+  name: "ヌメモン",
+  stage: EvolutionStage.CHAMPION,
+  baseStats: { hp: 160, atk: 42, def: 34 },
+  statCaps: { hp: 500, atk: 140, def: 120 },
   evolutionRequirement: null,
   evolutionPaths: [],
-  description: "メガドラモンの上位種。より大型の兵器を搭載した暗黒竜。",
+  description: "軟体型モンスター。汚物を投げつける不潔な戦法。",
   isEnemyOnly: true,
 };
 
-const metalgreymon_virus: MonsterDefinition = {
-  id: "metalgreymon_virus",
-  name: "メタルグレイモン(ウイルス)",
-  stage: EvolutionStage.ULTIMATE,
-  baseStats: { hp: 375, atk: 110, def: 84 },
-  statCaps: { hp: 1200, atk: 320, def: 270 },
+const devidramon: MonsterDefinition = {
+  id: "devidramon",
+  name: "デビドラモン",
+  stage: EvolutionStage.CHAMPION,
+  baseStats: { hp: 155, atk: 50, def: 32 },
+  statCaps: { hp: 500, atk: 140, def: 120 },
   evolutionRequirement: null,
   evolutionPaths: [],
-  description: "ウイルスに侵されたメタルグレイモン。暴走する兵器。",
+  description: "邪竜型モンスター。暗闇で赤い目を光らせて獲物を狙う。",
   isEnemyOnly: true,
 };
 
-const skullgreymon: MonsterDefinition = {
-  id: "skullgreymon",
-  name: "スカルグレイモン",
-  stage: EvolutionStage.ULTIMATE,
-  baseStats: { hp: 355, atk: 118, def: 78 },
-  statCaps: { hp: 1200, atk: 320, def: 270 },
+const flymon: MonsterDefinition = {
+  id: "flymon",
+  name: "フライモン",
+  stage: EvolutionStage.CHAMPION,
+  baseStats: { hp: 150, atk: 48, def: 33 },
+  statCaps: { hp: 500, atk: 140, def: 120 },
   evolutionRequirement: null,
   evolutionPaths: [],
-  description: "暴走進化した骸骨竜型。理性を失い破壊衝動のみで動く。",
+  description: "巨大なハチ型モンスター。毒針で敵を刺す。",
   isEnemyOnly: true,
 };
 
-const datamon: MonsterDefinition = {
-  id: "datamon",
-  name: "ナノモン",
-  stage: EvolutionStage.ULTIMATE,
-  baseStats: { hp: 340, atk: 108, def: 92 },
-  statCaps: { hp: 1200, atk: 320, def: 270 },
+const bakemon: MonsterDefinition = {
+  id: "bakemon",
+  name: "バケモン",
+  stage: EvolutionStage.CHAMPION,
+  baseStats: { hp: 148, atk: 44, def: 36 },
+  statCaps: { hp: 500, atk: 140, def: 120 },
   evolutionRequirement: null,
   evolutionPaths: [],
-  description: "超小型マシン型モンスター。電子攻撃でシステムを破壊する。",
+  description: "幽霊型モンスター。布に包まれた不気味な存在。",
   isEnemyOnly: true,
 };
+
+// ========== W5-W6 level (Ultimate) ==========
 
 const waruseadramon: MonsterDefinition = {
   id: "waruseadramon",
@@ -339,119 +295,71 @@ const blossomon: MonsterDefinition = {
   isEnemyOnly: true,
 };
 
-// ========== W7-W8 level (Ultimate / Mega stage stats) ==========
+// ========== 追加 Ultimate ==========
 
-const piedmon: MonsterDefinition = {
-  id: "piedmon",
-  name: "ピエモン",
-  stage: EvolutionStage.MEGA,
-  baseStats: { hp: 850, atk: 248, def: 198 },
-  statCaps: { hp: 3000, atk: 800, def: 650 },
+const etemon: MonsterDefinition = {
+  id: "etemon",
+  name: "エテモン",
+  stage: EvolutionStage.ULTIMATE,
+  baseStats: { hp: 370, atk: 105, def: 82 },
+  statCaps: { hp: 1200, atk: 320, def: 270 },
   evolutionRequirement: null,
   evolutionPaths: [],
-  description: "闇の四天王の一体。道化師の姿で四本の剣を操る。",
+  description: "猿型の完全体。自称キングオブデジモン。暗黒ネットワークを操る。",
   isEnemyOnly: true,
 };
 
-const machinedramon: MonsterDefinition = {
-  id: "machinedramon",
-  name: "ムゲンドラモン",
-  stage: EvolutionStage.MEGA,
-  baseStats: { hp: 880, atk: 255, def: 205 },
-  statCaps: { hp: 3000, atk: 800, def: 650 },
+const archnemon: MonsterDefinition = {
+  id: "archnemon",
+  name: "アルケニモン",
+  stage: EvolutionStage.ULTIMATE,
+  baseStats: { hp: 360, atk: 108, def: 84 },
+  statCaps: { hp: 1200, atk: 320, def: 270 },
   evolutionRequirement: null,
   evolutionPaths: [],
-  description: "闇の四天王の一体。全身が機械の巨大竜型。無限の砲門を持つ。",
+  description: "蜘蛛女型の完全体。ダークタワーからデジモンを生み出す。",
   isEnemyOnly: true,
 };
 
-const metalseadramon: MonsterDefinition = {
-  id: "metalseadramon",
-  name: "メタルシードラモン",
-  stage: EvolutionStage.MEGA,
-  baseStats: { hp: 835, atk: 242, def: 200 },
-  statCaps: { hp: 3000, atk: 800, def: 650 },
+const mummymon: MonsterDefinition = {
+  id: "mummymon",
+  name: "マミーモン",
+  stage: EvolutionStage.ULTIMATE,
+  baseStats: { hp: 375, atk: 102, def: 88 },
+  statCaps: { hp: 1200, atk: 320, def: 270 },
   evolutionRequirement: null,
   evolutionPaths: [],
-  description: "闇の四天王の一体。金属の鎧を纏った海竜型。深海の支配者。",
+  description: "ミイラ型の完全体。アルケニモンの相棒。銃撃戦が得意。",
   isEnemyOnly: true,
 };
 
-const puppetmon: MonsterDefinition = {
-  id: "puppetmon",
-  name: "ピノッチモン",
-  stage: EvolutionStage.MEGA,
-  baseStats: { hp: 810, atk: 240, def: 195 },
-  statCaps: { hp: 3000, atk: 800, def: 650 },
-  evolutionRequirement: null,
-  evolutionPaths: [],
-  description: "闇の四天王の一体。木偶人形の姿だが恐るべき力を秘める。",
-  isEnemyOnly: true,
-};
+// ========== W9-W10 level (Mega) ==========
 
-const blackwargreymon: MonsterDefinition = {
-  id: "blackwargreymon",
-  name: "ブラックウォーグレイモン",
+const apocalymon: MonsterDefinition = {
+  id: "apocalymon",
+  name: "アポカリモン",
   stage: EvolutionStage.MEGA,
-  baseStats: { hp: 870, atk: 260, def: 200 },
+  baseStats: { hp: 900, atk: 270, def: 210 },
   statCaps: { hp: 3000, atk: 800, def: 650 },
   evolutionRequirement: null,
   evolutionPaths: [],
-  description: "暗黒の竜戦士型究極体。存在意義を求めて彷徨う孤高の戦士。",
-  isEnemyOnly: true,
-};
-
-const diaboromon: MonsterDefinition = {
-  id: "diaboromon",
-  name: "ディアボロモン",
-  stage: EvolutionStage.MEGA,
-  baseStats: { hp: 845, atk: 250, def: 195 },
-  statCaps: { hp: 3000, atk: 800, def: 650 },
-  evolutionRequirement: null,
-  evolutionPaths: [],
-  description: "ネットワーク上に出現した究極体。無限に自己増殖する恐怖の存在。",
-  isEnemyOnly: true,
-};
-
-const venommyotismon: MonsterDefinition = {
-  id: "venommyotismon",
-  name: "ヴェノムヴァンデモン",
-  stage: EvolutionStage.MEGA,
-  baseStats: { hp: 890, atk: 245, def: 202 },
-  statCaps: { hp: 3000, atk: 800, def: 650 },
-  evolutionRequirement: null,
-  evolutionPaths: [],
-  description: "吸血鬼型究極体が暴走した異形。圧倒的な体力で敵を圧殺する。",
-  isEnemyOnly: true,
-};
-
-const grandkuwagamon: MonsterDefinition = {
-  id: "grandkuwagamon",
-  name: "グランクワガーモン",
-  stage: EvolutionStage.MEGA,
-  baseStats: { hp: 855, atk: 252, def: 196 },
-  statCaps: { hp: 3000, atk: 800, def: 650 },
-  evolutionRequirement: null,
-  evolutionPaths: [],
-  description: "巨大なクワガタ型究極体。大顎で全てを断ち切る。",
+  description: "全デジモンの怨念が集合した究極の存在。W10最終ボス。",
   isEnemyOnly: true,
 };
 
 /** 敵専用モンスター一覧 */
 export const ENEMY_ONLY_MONSTERS: readonly MonsterDefinition[] = [
-  goblimon,
-  gazimon,
-  ogremon,
-  darktyranomon,
-  cyclonemon,
-  tuskmon,
   // W1-W2 level
+  gazimon,
   mushroomon,
-  kunemon,
+  cyclonemon,
   goburimon,
   shamanmon,
   gizamon,
+  demidevimon,
+  betamon,
   // W3-W4 level
+  tuskmon,
   minotauromon,
   snimon,
   drimogemon,
@@ -460,22 +368,16 @@ export const ENEMY_ONLY_MONSTERS: readonly MonsterDefinition[] = [
   deltamon,
   raremon,
   monochromon,
+  numemon,
+  devidramon,
+  flymon,
+  bakemon,
   // W5-W6 level
-  mammothmon,
-  megadramon,
-  gigadramon,
-  metalgreymon_virus,
-  skullgreymon,
-  datamon,
   waruseadramon,
   blossomon,
-  // W7-W8 level
-  piedmon,
-  machinedramon,
-  metalseadramon,
-  puppetmon,
-  blackwargreymon,
-  diaboromon,
-  venommyotismon,
-  grandkuwagamon,
+  etemon,
+  archnemon,
+  mummymon,
+  // W9-W10 level
+  apocalymon,
 ] as const;

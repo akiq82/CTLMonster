@@ -136,6 +136,56 @@ describe("Monster Definitions", () => {
     });
   });
 
+  it("every playable non-Baby-I monster is reachable from at least one Baby I", () => {
+    const allPlayable = Array.from(MONSTER_DEFINITIONS.values()).filter(
+      (m) => !m.isEnemyOnly
+    );
+    const babyIStarters = allPlayable.filter(
+      (m) => m.stage === EvolutionStage.BABY_I
+    );
+
+    // BFS from all Baby I starters
+    const reachable = new Set<string>();
+    const queue: string[] = babyIStarters.map((m) => m.id);
+    for (const id of queue) {
+      reachable.add(id);
+    }
+
+    while (queue.length > 0) {
+      const currentId = queue.shift()!;
+      const def = MONSTER_DEFINITIONS.get(currentId)!;
+      for (const path of def.evolutionPaths) {
+        if (!reachable.has(path.targetId)) {
+          reachable.add(path.targetId);
+          queue.push(path.targetId);
+        }
+      }
+    }
+
+    // Check every playable non-Baby-I monster is reachable
+    const unreachable: string[] = [];
+    for (const m of allPlayable) {
+      if (m.stage === EvolutionStage.BABY_I) continue;
+      if (!reachable.has(m.id)) {
+        unreachable.push(`${m.id} (${m.name}, stage ${m.stage})`);
+      }
+    }
+
+    expect(unreachable).toEqual([]);
+  });
+
+  it("should have 123 playable monsters and 27 enemy-only (150 total)", () => {
+    const playable = Array.from(MONSTER_DEFINITIONS.values()).filter(
+      (m) => !m.isEnemyOnly
+    );
+    const enemyOnly = Array.from(MONSTER_DEFINITIONS.values()).filter(
+      (m) => m.isEnemyOnly
+    );
+    expect(playable.length).toBe(123);
+    expect(enemyOnly.length).toBe(27);
+    expect(MONSTER_DEFINITIONS.size).toBe(150);
+  });
+
   describe("Enemy-only monsters", () => {
     it("should have enemy-only monsters for W1 and W2", () => {
       const enemies = Array.from(MONSTER_DEFINITIONS.values()).filter(

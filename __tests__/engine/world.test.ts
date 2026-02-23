@@ -76,19 +76,19 @@ describe("World Engine", () => {
       expect(getAvailableWorlds(progress)).toEqual([1, 2, 3, 4]);
     });
 
-    it("should not go beyond W8", () => {
+    it("should not go beyond W10", () => {
       const progress = new Map<number, WorldProgress>();
-      for (let i = 1; i <= 8; i++) {
+      for (let i = 1; i <= 10; i++) {
         progress.set(i, { worldNumber: i, killCount: 15, bossDefeated: true });
       }
       const available = getAvailableWorlds(progress);
-      expect(available[available.length - 1]).toBe(8);
+      expect(available[available.length - 1]).toBe(10);
     });
   });
 
   describe("getWorldDefinition", () => {
-    it("should return valid world for 1-8", () => {
-      for (let i = 1; i <= 8; i++) {
+    it("should return valid world for 1-10", () => {
+      for (let i = 1; i <= 10; i++) {
         const world = getWorldDefinition(i);
         expect(world.worldNumber).toBe(i);
       }
@@ -96,7 +96,7 @@ describe("World Engine", () => {
 
     it("should throw for invalid world number", () => {
       expect(() => getWorldDefinition(0)).toThrow();
-      expect(() => getWorldDefinition(9)).toThrow();
+      expect(() => getWorldDefinition(11)).toThrow();
     });
   });
 

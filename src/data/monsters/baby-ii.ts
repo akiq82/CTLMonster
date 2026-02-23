@@ -72,7 +72,7 @@ const tokomon: MonsterDefinition = {
   evolutionPaths: [
     { targetId: "patamon", branchType: BranchType.HP },
     { targetId: "elecmon", branchType: BranchType.ATK },
-    { targetId: "lopmon", branchType: BranchType.DEF },
+    { targetId: "kotemon", branchType: BranchType.DEF },
     { targetId: "hawkmon", branchType: BranchType.BALANCED },
   ],
   description: "小さな体に大きな口を持つ。普段は温厚だが怒ると噛みつく。",
@@ -130,6 +130,129 @@ const nyaromon: MonsterDefinition = {
   isEnemyOnly: false,
 };
 
+// ========== 敵専用から昇格 ==========
+
+const goblimon: MonsterDefinition = {
+  id: "goblimon",
+  name: "ゴブリモン",
+  stage: EvolutionStage.BABY_II,
+  baseStats: { hp: 20, atk: 8, def: 5 },
+  statCaps: { hp: 80, atk: 25, def: 20 },
+  evolutionRequirement: { hp: 20, atk: 6, def: 5, bossWorld: null },
+  evolutionPaths: [
+    { targetId: "ogremon", branchType: BranchType.ATK },
+    { targetId: "ogremon", branchType: BranchType.BALANCED },
+    { targetId: "darktyranomon", branchType: BranchType.HP },
+    { targetId: "elecmon", branchType: BranchType.DEF },
+  ],
+  description: "こん棒を振り回す小鬼型モンスター。攻撃的な性格。",
+  isEnemyOnly: false,
+};
+
+const kunemon: MonsterDefinition = {
+  id: "kunemon",
+  name: "クネモン",
+  stage: EvolutionStage.BABY_II,
+  baseStats: { hp: 18, atk: 9, def: 5 },
+  statCaps: { hp: 80, atk: 25, def: 20 },
+  evolutionRequirement: { hp: 20, atk: 6, def: 5, bossWorld: null },
+  evolutionPaths: [
+    { targetId: "tentomon", branchType: BranchType.ATK },
+    { targetId: "wormmon", branchType: BranchType.DEF },
+    { targetId: "palmon", branchType: BranchType.HP },
+    { targetId: "tentomon", branchType: BranchType.BALANCED },
+  ],
+  description: "電気を帯びた芋虫型モンスター。痺れる糸を吐く。昆虫系統の始祖。",
+  isEnemyOnly: false,
+};
+
+// ========== 02世代 ==========
+
+const demiveemon: MonsterDefinition = {
+  id: "demiveemon",
+  name: "チビモン",
+  stage: EvolutionStage.BABY_II,
+  baseStats: { hp: 24, atk: 9, def: 6 },
+  statCaps: { hp: 80, atk: 25, def: 20 },
+  evolutionRequirement: { hp: 20, atk: 6, def: 5, bossWorld: null },
+  evolutionPaths: [
+    { targetId: "veemon", branchType: BranchType.ATK },
+    { targetId: "veemon", branchType: BranchType.BALANCED },
+    { targetId: "agumon", branchType: BranchType.HP },
+    { targetId: "gaomon", branchType: BranchType.DEF },
+  ],
+  description: "ブイモンの幼年期。活発で元気いっぱい。",
+  isEnemyOnly: false,
+};
+
+const minomon: MonsterDefinition = {
+  id: "minomon",
+  name: "ミノモン",
+  stage: EvolutionStage.BABY_II,
+  baseStats: { hp: 22, atk: 7, def: 8 },
+  statCaps: { hp: 80, atk: 25, def: 20 },
+  evolutionRequirement: { hp: 20, atk: 6, def: 5, bossWorld: null },
+  evolutionPaths: [
+    { targetId: "wormmon", branchType: BranchType.DEF },
+    { targetId: "wormmon", branchType: BranchType.BALANCED },
+    { targetId: "tentomon", branchType: BranchType.ATK },
+    { targetId: "palmon", branchType: BranchType.HP },
+  ],
+  description: "ワームモンの幼年期。大人しく優しい心を持つ。",
+  isEnemyOnly: false,
+};
+
+const upamon: MonsterDefinition = {
+  id: "upamon",
+  name: "ウパモン",
+  stage: EvolutionStage.BABY_II,
+  baseStats: { hp: 26, atk: 6, def: 7 },
+  statCaps: { hp: 80, atk: 25, def: 20 },
+  evolutionRequirement: { hp: 20, atk: 6, def: 5, bossWorld: null },
+  evolutionPaths: [
+    { targetId: "armadimon", branchType: BranchType.HP },
+    { targetId: "armadimon", branchType: BranchType.DEF },
+    { targetId: "gomamon", branchType: BranchType.ATK },
+    { targetId: "armadimon", branchType: BranchType.BALANCED },
+  ],
+  description: "アルマジモンの幼年期。ぷよぷよした体で水辺が好き。",
+  isEnemyOnly: false,
+};
+
+const poromon: MonsterDefinition = {
+  id: "poromon",
+  name: "ポロモン",
+  stage: EvolutionStage.BABY_II,
+  baseStats: { hp: 23, atk: 8, def: 7 },
+  statCaps: { hp: 80, atk: 25, def: 20 },
+  evolutionRequirement: { hp: 20, atk: 6, def: 5, bossWorld: null },
+  evolutionPaths: [
+    { targetId: "hawkmon", branchType: BranchType.ATK },
+    { targetId: "hawkmon", branchType: BranchType.BALANCED },
+    { targetId: "plotmon", branchType: BranchType.DEF },
+    { targetId: "patamon", branchType: BranchType.HP },
+  ],
+  description: "ホークモンの幼年期。小さな翼でぱたぱた飛ぶ。",
+  isEnemyOnly: false,
+};
+
+const motimon: MonsterDefinition = {
+  id: "motimon",
+  name: "モチモン",
+  stage: EvolutionStage.BABY_II,
+  baseStats: { hp: 25, atk: 7, def: 6 },
+  statCaps: { hp: 80, atk: 25, def: 20 },
+  evolutionRequirement: { hp: 20, atk: 6, def: 5, bossWorld: null },
+  evolutionPaths: [
+    { targetId: "tentomon", branchType: BranchType.ATK },
+    { targetId: "tentomon", branchType: BranchType.BALANCED },
+    { targetId: "elecmon", branchType: BranchType.HP },
+    { targetId: "hagurumon", branchType: BranchType.DEF },
+  ],
+  description: "テントモンの幼年期。もちもちした体の基本系統。",
+  isEnemyOnly: false,
+};
+
 /** 幼年期II モンスター一覧 */
 export const BABY_II_MONSTERS: readonly MonsterDefinition[] = [
   koromon,
@@ -139,4 +262,11 @@ export const BABY_II_MONSTERS: readonly MonsterDefinition[] = [
   bukamon,
   tanemon,
   nyaromon,
+  goblimon,
+  kunemon,
+  demiveemon,
+  minomon,
+  upamon,
+  poromon,
+  motimon,
 ] as const;

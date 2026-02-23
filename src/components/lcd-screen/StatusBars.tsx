@@ -7,6 +7,7 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { LCD_COLORS } from "./LcdFrame";
+import { WP_CONSTANTS } from "../../types/battle";
 
 interface StatusBarsProps {
   /** 現在HP */
@@ -19,6 +20,8 @@ interface StatusBarsProps {
   daysAlive: number;
   /** 最大寿命（日） */
   maxLifespan: number;
+  /** ベースTP (未配分) */
+  baseTp?: number;
   /** TP-L */
   tpL: number;
   /** TP-M */
@@ -75,6 +78,7 @@ export function StatusBars({
   discipline,
   daysAlive,
   maxLifespan,
+  baseTp = 0,
   tpL,
   tpM,
   tpH,
@@ -108,11 +112,13 @@ export function StatusBars({
       </View>
 
       <View style={styles.countersRow}>
+        {baseTp > 0 && <Text style={styles.counterHighlight}>B:{baseTp}</Text>}
         <Text style={styles.counterText}>L:{tpL}</Text>
         <Text style={styles.counterText}>M:{tpM}</Text>
         <Text style={styles.counterText}>H:{tpH}</Text>
-        <Text style={styles.counterText}>WP:{wp}</Text>
-        <Text style={styles.counterText}>EN:{encounterCount}</Text>
+        <Text style={styles.counterText}>
+          EN:{encounterCount} ▲{(WP_CONSTANTS.ENCOUNTER_WP_COST - wp).toLocaleString()}
+        </Text>
       </View>
     </View>
   );
@@ -181,5 +187,13 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontFamily: "monospace",
     fontWeight: "bold",
+  },
+  counterHighlight: {
+    color: LCD_COLORS.DOT,
+    fontSize: 9,
+    fontFamily: "monospace",
+    fontWeight: "bold",
+    backgroundColor: LCD_COLORS.DOT_MID,
+    paddingHorizontal: 2,
   },
 });

@@ -6,6 +6,8 @@ import {
   canChallengeBoss,
   convertWpToEncounters,
   calculateRideWp,
+  getEnemyPhase,
+  MOB_PHASE_BOUNDARIES,
 } from "../../src/engine/encounter";
 import { WP_CONSTANTS } from "../../src/types/battle";
 import { WORLD_MAP } from "../../src/data/worlds";
@@ -36,21 +38,94 @@ describe("Encounter Engine", () => {
     });
   });
 
-  describe("generateEnemy", () => {
-    it("should generate enemy within W1 stat ranges", () => {
-      const world = WORLD_MAP.get(1)!;
-      const enemy = generateEnemy(world.enemies, fixedRng(0));
+  describe("getEnemyPhase", () => {
+    it("should return phase 0 for killCount 0-3", () => {
+      expect(getEnemyPhase(0)).toBe(0);
+      expect(getEnemyPhase(3)).toBe(0);
+    });
 
+    it("should return phase 1 for killCount 4-6", () => {
+      expect(getEnemyPhase(4)).toBe(1);
+      expect(getEnemyPhase(6)).toBe(1);
+    });
+
+    it("should return phase 2 for killCount 7+", () => {
+      expect(getEnemyPhase(7)).toBe(2);
+      expect(getEnemyPhase(10)).toBe(2);
+      expect(getEnemyPhase(99)).toBe(2);
+    });
+
+    it("should have correct boundaries", () => {
+      expect(MOB_PHASE_BOUNDARIES[0]).toBe(4);
+      expect(MOB_PHASE_BOUNDARIES[1]).toBe(7);
+    });
+  });
+
+  describe("generateEnemy", () => {
+    it("should generate phase 0 (weakest) enemy at killCount=0", () => {
+      const world = WORLD_MAP.get(1)!;
+      const enemy = generateEnemy(world.enemies, 0, fixedRng(0));
+
+      // Phase 0 selects enemies[0] (weakest)
       expect(enemy.currentHp).toBeGreaterThanOrEqual(15);
       expect(enemy.currentHp).toBeLessThanOrEqual(35);
       expect(enemy.atk).toBeGreaterThanOrEqual(5);
       expect(enemy.def).toBeGreaterThanOrEqual(3);
     });
 
+    it("should generate stronger enemy at higher killCount", () => {
+      const world = WORLD_MAP.get(1)!;
+      const enemyPhase0 = generateEnemy(world.enemies, 0, fixedRng(0.5));
+      const enemyPhase2 = generateEnemy(world.enemies, 7, fixedRng(0.5));
+
+      // Phase 2 enemy should be stronger than phase 0
+      expect(enemyPhase2.maxHp).toBeGreaterThanOrEqual(enemyPhase0.maxHp);
+    });
+
     it("should set currentHp equal to maxHp", () => {
       const world = WORLD_MAP.get(1)!;
-      const enemy = generateEnemy(world.enemies, fixedRng(0.5));
+      const enemy = generateEnemy(world.enemies, 0, fixedRng(0.5));
       expect(enemy.currentHp).toBe(enemy.maxHp);
+    });
+
+    it("should default killCount to 0 when omitted", () => {
+      const world = WORLD_MAP.get(1)!;
+      const enemy = generateEnemy(world.enemies);
+      expect(enemy.currentHp).toBeGreaterThan(0);
+    });
+
+    it("should randomly select from 4 enemies per phase (12 total)", () => {
+      const world = WORLD_MAP.get(1)!;
+      expect(world.enemies.length).toBe(12);
+
+      // rng=0 selects first enemy in phase, rng=0.99 selects last
+      const first = generateEnemy(world.enemies, 0, fixedRng(0));
+      const last = generateEnemy(world.enemies, 0, fixedRng(0.99));
+
+      // Both should be from phase 0 (indices 0-3) with valid stats
+      expect(first.currentHp).toBeGreaterThanOrEqual(15);
+      expect(last.currentHp).toBeGreaterThanOrEqual(15);
+
+      // Different rng values may select different enemies
+      // (first picks enemies[0], last picks enemies[3])
+      expect(first.name).not.toBe(last.name);
+    });
+
+    it("should work with variable enemy counts (backwards compatible)", () => {
+      // Test with 3 enemies (old style) — each phase gets ceil(3/3)=1
+      const threeEnemies = [
+        { monsterId: "a", hp: { min: 10, max: 20 }, atk: { min: 5, max: 10 }, def: { min: 3, max: 5 }, discipline: 40 },
+        { monsterId: "b", hp: { min: 20, max: 30 }, atk: { min: 8, max: 15 }, def: { min: 5, max: 8 }, discipline: 42 },
+        { monsterId: "c", hp: { min: 30, max: 40 }, atk: { min: 12, max: 20 }, def: { min: 8, max: 12 }, discipline: 45 },
+      ] as const;
+
+      const e0 = generateEnemy(threeEnemies, 0, fixedRng(0));
+      const e1 = generateEnemy(threeEnemies, 4, fixedRng(0));
+      const e2 = generateEnemy(threeEnemies, 7, fixedRng(0));
+
+      expect(e0.name).toBe("a");
+      expect(e1.name).toBe("b");
+      expect(e2.name).toBe("c");
     });
   });
 

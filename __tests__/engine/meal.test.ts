@@ -92,29 +92,29 @@ describe("Meal System", () => {
       expect(MEAL_TRAINING_BONUS).toBe(1.1);
     });
 
-    it("without meal bonus: LSD rng=0 → HP+5, ATK+0, DEF+1", () => {
+    it("without meal bonus: LSD rng=0 → HP+4.0, ATK+0, DEF+0.8 (0.80x decimal gains)", () => {
       const result = executeTraining(lsd, false, fixedRng(0));
-      expect(result.hpGain).toBe(5);
+      expect(result.hpGain).toBe(4.0);
       expect(result.atkGain).toBe(0);
-      expect(result.defGain).toBe(1);
+      expect(result.defGain).toBe(0.8);
       expect(result.mealBonusApplied).toBe(false);
     });
 
-    it("with meal bonus: LSD rng=0 → HP ceil(5×1.1)=6, DEF ceil(1×1.1)=2", () => {
+    it("with meal bonus: LSD rng=0 → HP round(4.0×1.1)=4.4, DEF round(0.8×1.1)=0.9", () => {
       const result = executeTraining(lsd, true, fixedRng(0));
-      expect(result.hpGain).toBe(6);
-      expect(result.atkGain).toBe(0); // ceil(0×1.1) = 0
-      expect(result.defGain).toBe(2);
+      expect(result.hpGain).toBe(4.4);
+      expect(result.atkGain).toBe(0);
+      expect(result.defGain).toBe(0.9);
       expect(result.mealBonusApplied).toBe(true);
     });
 
-    it("meal bonus is ceil, not floor (always beneficial)", () => {
-      // VO2max: ATK+4 with rng=0 → ceil(4×1.1) = ceil(4.4) = 5
+    it("meal bonus ×1.1 with 0.1 precision rounding", () => {
+      // VO2max: ATK+3.2 with rng=0 → round(3.2×1.1*10)/10 = round(35.2)/10 = 3.5
       const vo2 = TRAINING_MENU_MAP.get("vo2max-interval")!;
       const withBonus = executeTraining(vo2, true, fixedRng(0));
       const withoutBonus = executeTraining(vo2, false, fixedRng(0));
-      expect(withBonus.atkGain).toBe(5);
-      expect(withoutBonus.atkGain).toBe(4);
+      expect(withBonus.atkGain).toBe(3.5);
+      expect(withoutBonus.atkGain).toBe(3.2);
     });
   });
 

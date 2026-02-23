@@ -32,8 +32,10 @@ const MAIN_MENU: MenuItem[] = [
   { id: "train", label: "TRAIN" },
   { id: "battle", label: "BATTLE" },
   { id: "world", label: "WORLD" },
+  { id: "tp-alloc", label: "TP配分" },
   { id: "meal", label: "MEAL" },
   { id: "book", label: "BOOK" },
+  { id: "history", label: "HISTORY" },
   { id: "settings", label: "CONFIG" },
 ];
 
@@ -151,6 +153,7 @@ export default function HomeScreen() {
   const setPhase = useGameStore((s) => s.setPhase);
   const setPlayerName = useGameStore((s) => s.setPlayerName);
   const tp = useGameStore((s) => s.tp);
+  const baseTp = useGameStore((s) => s.baseTp);
   const wp = useGameStore((s) => s.wp);
   const encounterCount = useGameStore((s) => s.encounterCount);
   const monster = useMonsterStore((s) => s.monster);
@@ -179,15 +182,19 @@ export default function HomeScreen() {
 
   // Add WP from health data when it changes
   const addWp = useGameStore((s) => s.addWp);
+  const updateDailyLog = useEncyclopediaStore((s) => s.updateDailyLog);
+  const finalizeGeneration = useEncyclopediaStore((s) => s.finalizeGeneration);
   const lastWpRef = React.useRef(0);
   React.useEffect(() => {
     if (!slotSelected) return;
     if (healthData.wp > lastWpRef.current) {
       const delta = healthData.wp - lastWpRef.current;
       addWp(delta);
+      const today = new Date().toISOString().split("T")[0];
+      updateDailyLog(today, { wpGained: delta });
       lastWpRef.current = healthData.wp;
     }
-  }, [healthData.wp, addWp, slotSelected]);
+  }, [healthData.wp, addWp, updateDailyLog, slotSelected]);
 
   // スロットサマリーの同期（モンスター・フェーズ変更時）
   useEffect(() => {
@@ -234,11 +241,17 @@ export default function HomeScreen() {
       case "world":
         router.push("/world-select");
         break;
+      case "tp-alloc":
+        router.push("/allocate-tp");
+        break;
       case "meal":
         setShowMeal(true);
         break;
       case "book":
         router.push("/encyclopedia");
+        break;
+      case "history":
+        router.push("/history");
         break;
       case "settings":
         router.push("/settings");
@@ -372,6 +385,32 @@ export default function HomeScreen() {
               style={styles.rebirthButton}
               onPress={() => {
                 if (!nameInput.trim()) return;
+                // Finalize the current generation's history
+                const worldProgressMap = useWorldStore.getState().worldProgressMap;
+                const bossesDefeated = Object.values(worldProgressMap)
+                  .filter((p) => p.bossDefeated)
+                  .map((p) => p.worldNumber)
+                  .sort((a, b) => a - b);
+                const highestWorld = bossesDefeated.length > 0
+                  ? Math.max(...bossesDefeated) + 1
+                  : 1;
+                const daysLived = Math.floor(
+                  (Date.now() - new Date(monster.bornAt).getTime()) / (1000 * 60 * 60 * 24)
+                );
+                finalizeGeneration({
+                  generation: monster.generation,
+                  name: monster.name,
+                  finalFormId: monster.definitionId,
+                  finalHp: monster.maxHp,
+                  finalAtk: monster.atk,
+                  finalDef: monster.def,
+                  wins: monster.wins,
+                  losses: monster.losses,
+                  daysLived,
+                  diedAt: new Date().toISOString(),
+                  highestWorld,
+                  bossesDefeated,
+                });
                 createNextGen(nameInput.trim());
                 const newMonster = useMonsterStore.getState().monster;
                 if (newMonster) {
@@ -448,6 +487,7 @@ export default function HomeScreen() {
               discipline={monster.discipline}
               daysAlive={daysAlive}
               maxLifespan={monster.baseLifespan + monster.lifespanExtension}
+              baseTp={baseTp}
               tpL={tp.low}
               tpM={tp.mid}
               tpH={tp.high}

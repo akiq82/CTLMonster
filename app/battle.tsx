@@ -12,6 +12,7 @@ import { BattleAnimation } from "../src/components/BattleAnimation";
 import { useGameStore } from "../src/store/game-store";
 import { useMonsterStore } from "../src/store/monster-store";
 import { useWorldStore } from "../src/store/world-store";
+import { useEncyclopediaStore } from "../src/store/encyclopedia-store";
 import { MONSTER_DEFINITIONS } from "../src/data/monsters";
 import {
   canEncounter,
@@ -31,6 +32,7 @@ export default function BattleScreen() {
   const encounterCount = useGameStore((s) => s.encounterCount);
   const consumeWp = useGameStore((s) => s.consumeWp);
   const consumeEncounter = useGameStore((s) => s.consumeEncounter);
+  const addBaseTp = useGameStore((s) => s.addBaseTp);
   const monster = useMonsterStore((s) => s.monster);
   const applyBattleResult = useMonsterStore((s) => s.applyBattleResult);
   const currentWorldNumber = useWorldStore((s) => s.currentWorldNumber);
@@ -40,6 +42,8 @@ export default function BattleScreen() {
 
   const [phase, setPhase] = useState<BattlePhase>("select");
   const [battleResult, setBattleResult] = useState<BattleResult | null>(null);
+  const [playerFighter, setPlayerFighter] = useState<BattleFighter | null>(null);
+  const [enemyFighter, setEnemyFighter] = useState<BattleFighter | null>(null);
   const [enemyName, setEnemyName] = useState("");
   const [message, setMessage] = useState("");
 
@@ -76,13 +80,15 @@ export default function BattleScreen() {
       if (isBoss) {
         enemy = generateBoss(world);
       } else {
-        enemy = generateEnemy(world.enemies);
+        enemy = generateEnemy(world.enemies, progress.killCount);
       }
 
       const eDef = MONSTER_DEFINITIONS.get(
         isBoss ? world.boss.monsterId : "unknown"
       );
       setEnemyName(enemy.name);
+      setPlayerFighter(player);
+      setEnemyFighter(enemy);
 
       const result = executeBattle(player, enemy);
       setBattleResult(result);
@@ -90,6 +96,7 @@ export default function BattleScreen() {
 
       // Apply results after animation
       applyBattleResult(result);
+      addBaseTp(1); // バトルXP: 毎バトル +1 ベースTP
       if (result.playerWon) {
         if (isBoss) {
           addBossDefeat();
@@ -97,8 +104,19 @@ export default function BattleScreen() {
           addMobKill();
         }
       }
+
+      // DailyLog 記録
+      const today = new Date().toISOString().split("T")[0];
+      useEncyclopediaStore.getState().updateDailyLog(today, {
+        battlesWon: result.playerWon ? 1 : 0,
+        battlesLost: result.playerWon ? 0 : 1,
+        baseTpGained: 1,
+        bossDefeated: isBoss && result.playerWon,
+        bossWorldNumber: isBoss && result.playerWon ? currentWorldNumber : undefined,
+        worldNumber: currentWorldNumber,
+      });
     },
-    [monster, world, consumeWp, consumeEncounter, applyBattleResult, addMobKill, addBossDefeat]
+    [monster, world, progress.killCount, consumeWp, consumeEncounter, applyBattleResult, addBaseTp, addMobKill, addBossDefeat]
   );
 
   const handleBattleComplete = useCallback(() => {
@@ -163,13 +181,14 @@ export default function BattleScreen() {
           </View>
         )}
 
-        {phase === "battling" && battleResult && (
+        {phase === "battling" && battleResult && playerFighter && enemyFighter && (
           <BattleAnimation
             result={battleResult}
             playerName={monster.name}
             enemyName={enemyName}
+            playerFighter={playerFighter}
+            enemyFighter={enemyFighter}
             onComplete={handleBattleComplete}
-            turnSpeed={800}
           />
         )}
 
@@ -186,7 +205,7 @@ export default function BattleScreen() {
                   {battleResult.totalTurns} turns
                 </Text>
                 <Text style={styles.resultSub}>
-                  HP: {battleResult.playerRemainingHp}
+                  HP fully recovered!
                 </Text>
               </>
             ) : null}

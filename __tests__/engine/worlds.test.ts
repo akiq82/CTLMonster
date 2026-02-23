@@ -3,26 +3,32 @@ import { WORLD_CONSTANTS } from "../../src/types/world";
 import { MONSTER_DEFINITIONS } from "../../src/data/monsters";
 
 describe("World Definitions", () => {
-  it("should have exactly 8 worlds", () => {
-    expect(WORLD_DEFINITIONS).toHaveLength(8);
-    expect(WORLD_MAP.size).toBe(8);
+  it("should have exactly 10 worlds", () => {
+    expect(WORLD_DEFINITIONS).toHaveLength(10);
+    expect(WORLD_MAP.size).toBe(10);
   });
 
-  it("should have world numbers 1 through 8 in order", () => {
+  it("should have world numbers 1 through 10 in order", () => {
     for (let i = 0; i < WORLD_DEFINITIONS.length; i++) {
       expect(WORLD_DEFINITIONS[i].worldNumber).toBe(i + 1);
     }
   });
 
-  it("every world should require 15 kills", () => {
+  it("every world should require 10 kills", () => {
     for (const world of WORLD_DEFINITIONS) {
       expect(world.requiredKills).toBe(WORLD_CONSTANTS.REQUIRED_KILLS);
     }
   });
 
-  it("every world should have at least 2 enemy types", () => {
+  it("every world should have at least 9 enemy types", () => {
     for (const world of WORLD_DEFINITIONS) {
-      expect(world.enemies.length).toBeGreaterThanOrEqual(2);
+      expect(world.enemies.length).toBeGreaterThanOrEqual(9);
+    }
+  });
+
+  it("every world should have exactly 12 enemy entries", () => {
+    for (const world of WORLD_DEFINITIONS) {
+      expect(world.enemies.length).toBe(12);
     }
   });
 
@@ -75,6 +81,8 @@ describe("World Definitions", () => {
       { world: 6, hp: 1800, atk: 400, def: 330 },
       { world: 7, hp: 3200, atk: 700, def: 560 },
       { world: 8, hp: 5500, atk: 1100, def: 900 },
+      { world: 9, hp: 9000, atk: 1800, def: 1500 },
+      { world: 10, hp: 15000, atk: 2800, def: 2300 },
     ];
 
     for (const expected of bossExpected) {
@@ -97,6 +105,8 @@ describe("World Definitions", () => {
       { world: 6, hpMin: 500, hpMax: 1000, atkMin: 150, atkMax: 280, defMin: 120, defMax: 220 },
       { world: 7, hpMin: 900, hpMax: 1800, atkMin: 260, atkMax: 480, defMin: 210, defMax: 380 },
       { world: 8, hpMin: 1600, hpMax: 3000, atkMin: 450, atkMax: 800, defMin: 360, defMax: 620 },
+      { world: 9, hpMin: 2800, hpMax: 5000, atkMin: 780, atkMax: 1400, defMin: 620, defMax: 1100 },
+      { world: 10, hpMin: 4500, hpMax: 8000, atkMin: 1250, atkMax: 2200, defMin: 1000, defMax: 1760 },
     ];
 
     for (const range of mobRanges) {

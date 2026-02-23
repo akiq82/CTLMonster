@@ -65,28 +65,28 @@ describe("Training Engine", () => {
   describe("executeTraining", () => {
     const lsd = TRAINING_MENU_MAP.get("lsd")!;
 
-    it("should return min gains with rng=0", () => {
+    it("should return min gains with rng=0 (decimal values)", () => {
       const result = executeTraining(lsd, false, fixedRng(0));
-      expect(result.hpGain).toBe(5);
+      expect(result.hpGain).toBe(4.0);
       expect(result.atkGain).toBe(0);
-      expect(result.defGain).toBe(1);
+      expect(result.defGain).toBe(0.8);
       expect(result.mealBonusApplied).toBe(false);
     });
 
-    it("should return max gains with rng=0.999", () => {
+    it("should return max gains with rng=0.999 (decimal values)", () => {
       const result = executeTraining(lsd, false, fixedRng(0.999));
-      expect(result.hpGain).toBe(6);
-      expect(result.atkGain).toBe(1);
-      expect(result.defGain).toBe(2);
+      expect(result.hpGain).toBe(4.8);
+      expect(result.atkGain).toBe(0.8);
+      expect(result.defGain).toBe(1.6);
     });
 
-    it("should apply meal bonus ×1.1 with ceil", () => {
-      // With rng=0: HP=5, ATK=0, DEF=1
-      // After ×1.1: HP=ceil(5.5)=6, ATK=ceil(0)=0, DEF=ceil(1.1)=2
+    it("should apply meal bonus ×1.1 with 0.1 precision rounding", () => {
+      // With rng=0: HP=4.0, ATK=0, DEF=0.8
+      // After ×1.1: HP=round(4.4*10)/10=4.4, ATK=0, DEF=round(0.88*10)/10=0.9
       const result = executeTraining(lsd, true, fixedRng(0));
-      expect(result.hpGain).toBe(6);
+      expect(result.hpGain).toBe(4.4);
       expect(result.atkGain).toBe(0);
-      expect(result.defGain).toBe(2);
+      expect(result.defGain).toBe(0.9);
       expect(result.mealBonusApplied).toBe(true);
     });
 

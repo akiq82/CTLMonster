@@ -11,6 +11,7 @@ import { LcdFrame, LCD_COLORS } from "../src/components/lcd-screen/LcdFrame";
 import { TrainingMenu } from "../src/components/TrainingMenu";
 import { useGameStore } from "../src/store/game-store";
 import { useMonsterStore } from "../src/store/monster-store";
+import { useEncyclopediaStore } from "../src/store/encyclopedia-store";
 import { TRAINING_MENUS } from "../src/data/training-menus";
 import type { TrainingMenuDefinition, TrainingResult } from "../src/types/training";
 
@@ -20,6 +21,7 @@ export default function TrainingScreen() {
   const consumeTp = useGameStore((s) => s.consumeTp);
   const monster = useMonsterStore((s) => s.monster);
   const train = useMonsterStore((s) => s.train);
+  const updateDailyLog = useEncyclopediaStore((s) => s.updateDailyLog);
 
   const [result, setResult] = useState<TrainingResult | null>(null);
 
@@ -28,8 +30,10 @@ export default function TrainingScreen() {
       consumeTp({ low: menu.costTpL, mid: menu.costTpM, high: menu.costTpH });
       const r = train(menu);
       setResult(r);
+      const today = new Date().toISOString().split("T")[0];
+      updateDailyLog(today, { trainingSessions: 1 });
     },
-    [consumeTp, train]
+    [consumeTp, train, updateDailyLog]
   );
 
   if (!monster) {
