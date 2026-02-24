@@ -67,10 +67,10 @@ describe("Encounter Engine", () => {
       const enemy = generateEnemy(world.enemies, 0, fixedRng(0));
 
       // Phase 0 selects enemies[0] (weakest)
-      expect(enemy.currentHp).toBeGreaterThanOrEqual(15);
-      expect(enemy.currentHp).toBeLessThanOrEqual(35);
-      expect(enemy.atk).toBeGreaterThanOrEqual(5);
-      expect(enemy.def).toBeGreaterThanOrEqual(3);
+      expect(enemy.currentHp).toBeGreaterThanOrEqual(13);
+      expect(enemy.currentHp).toBeLessThanOrEqual(30);
+      expect(enemy.atk).toBeGreaterThanOrEqual(4);
+      expect(enemy.def).toBeGreaterThanOrEqual(2);
     });
 
     it("should generate stronger enemy at higher killCount", () => {
@@ -103,8 +103,8 @@ describe("Encounter Engine", () => {
       const last = generateEnemy(world.enemies, 0, fixedRng(0.99));
 
       // Both should be from phase 0 (indices 0-3) with valid stats
-      expect(first.currentHp).toBeGreaterThanOrEqual(15);
-      expect(last.currentHp).toBeGreaterThanOrEqual(15);
+      expect(first.currentHp).toBeGreaterThanOrEqual(13);
+      expect(last.currentHp).toBeGreaterThanOrEqual(13);
 
       // Different rng values may select different enemies
       // (first picks enemies[0], last picks enemies[3])
@@ -130,13 +130,13 @@ describe("Encounter Engine", () => {
   });
 
   describe("generateBoss", () => {
-    it("W1 boss should match GDD values", () => {
+    it("W1 boss should match rebalanced values", () => {
       const world = WORLD_MAP.get(1)!;
       const boss = generateBoss(world);
 
-      expect(boss.currentHp).toBe(70);
-      expect(boss.atk).toBe(20);
-      expect(boss.def).toBe(15);
+      expect(boss.currentHp).toBe(60);
+      expect(boss.atk).toBe(15);
+      expect(boss.def).toBe(10);
     });
   });
 

@@ -68,6 +68,17 @@ const INTENSITY = {
 
 interface RidePattern { low: number; mid: number; high: number; label: string }
 
+// Pattern D: CTL60 ~TSS420/week (4 rides)
+const RIDES_D: RidePattern[] = [
+  { low: 50,  mid: 0,   high: 0,  label: "低50min" },
+  { low: 20,  mid: 15,  high: 10, label: "高10+中15+低20min" },
+  { low: 0,   mid: 0,   high: 0,  label: "休息" },
+  { low: 30,  mid: 20,  high: 0,  label: "中20+低30min" },
+  { low: 20,  mid: 15,  high: 10, label: "高10+中15+低20min" },
+  { low: 0,   mid: 0,   high: 0,  label: "休息" },
+  { low: 0,   mid: 0,   high: 0,  label: "休息" },
+];
+
 // Pattern A: CTL70 ~TSS490/week (5 rides)
 const RIDES_A: RidePattern[] = [
   { low: 60,  mid: 0,   high: 0,  label: "低60min" },
@@ -90,21 +101,22 @@ const RIDES_B: RidePattern[] = [
   { low: 0,   mid: 0,   high: 0,  label: "休息" },
 ];
 
-// Pattern C: CTL90 ~TSS630/week (7 rides including long)
+// Pattern C: CTL90 ~TSS630/week (7 rides, balanced mid/high for TP)
 const RIDES_C: RidePattern[] = [
-  { low: 60,  mid: 0,   high: 0,  label: "低60min" },
-  { low: 30,  mid: 20,  high: 15, label: "高15+中20+低30min" },
-  { low: 40,  mid: 30,  high: 0,  label: "中30+低40min" },
-  { low: 30,  mid: 20,  high: 15, label: "高15+中20+低30min" },
-  { low: 60,  mid: 0,   high: 0,  label: "低60min" },
+  { low: 60,  mid: 0,   high: 0,  label: "リカバリー60min" },
+  { low: 30,  mid: 20,  high: 20, label: "高20+中20+低30min" },
+  { low: 40,  mid: 40,  high: 0,  label: "テンポ中40+低40min" },
+  { low: 20,  mid: 20,  high: 20, label: "インターバル高20+中20+低20min" },
+  { low: 60,  mid: 0,   high: 0,  label: "リカバリー60min" },
   { low: 60,  mid: 30,  high: 15, label: "高15+中30+低60min" },
-  { low: 240, mid: 30,  high: 0,  label: "中30+低240min" },
+  { low: 120, mid: 60,  high: 0,  label: "ロング中60+低120min" },
 ];
 
 const PATTERNS: PatternConfig[] = [
-  { name: "A", ctl: 70, tsb: -5,  steps: 10000, rides: RIDES_A, targetStage: "Ultimate", targetWorld: 7 },
-  { name: "B", ctl: 80, tsb: -10, steps: 10000, rides: RIDES_B, targetStage: "Mega",     targetWorld: 9 },
-  { name: "C", ctl: 90, tsb: -15, steps: 12000, rides: RIDES_C, targetStage: "Mega+",    targetWorld: 10 },
+  { name: "D", ctl: 60, tsb: 0,   steps: 10000, rides: RIDES_D, targetStage: "Champion",  targetWorld: 5 },
+  { name: "A", ctl: 70, tsb: -5,  steps: 10000, rides: RIDES_A, targetStage: "Ultimate",  targetWorld: 7 },
+  { name: "B", ctl: 80, tsb: -10, steps: 10000, rides: RIDES_B, targetStage: "Mega",      targetWorld: 9 },
+  { name: "C", ctl: 90, tsb: -15, steps: 12000, rides: RIDES_C, targetStage: "Mega+",     targetWorld: 10 },
 ];
 
 // ============================================================
@@ -349,11 +361,11 @@ function simulateTrial(config: PatternConfig): TrialResult {
 // ============================================================
 // Main
 // ============================================================
-console.log("╔═══════════════════════════════════════════════════════════════════╗");
-console.log("║  Balance Simulation — Pattern A/B/C × 50 generations × 10 trials ║");
-console.log("║  Stage training factors: ×1/×2/×5/×10/×25/×60                    ║");
-console.log("║  PMC_BASE_TP=35, proportional evo requirements                   ║");
-console.log("╚═══════════════════════════════════════════════════════════════════╝\n");
+console.log("╔══════════════════════════════════════════════════════════════════════╗");
+console.log("║  Balance Simulation — Pattern D/A/B/C × 50 generations × 10 trials ║");
+console.log("║  Stage factors: ×1.0-2.0, 20% evo boost, no equip for evo         ║");
+console.log("║  CTL60 miss Ultimate, CTL70 reach Ultimate, CTL90 reach Mega       ║");
+console.log("╚══════════════════════════════════════════════════════════════════════╝\n");
 
 for (const config of PATTERNS) {
   console.log(`\n${"═".repeat(70)}`);

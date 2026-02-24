@@ -131,7 +131,7 @@ describe("Balance Simulation (CTL60 / TSS350 / 10k steps) — baseTp + stage fac
   });
 
   describe("Training → Stats with stage factor gains (rng=0.5)", () => {
-    it("Baby II ×2 stage factor should produce meaningful stat gains toward evolution", () => {
+    it("Baby II ×1.2 stage factor should produce meaningful stat gains toward evolution", () => {
       const rng = fixedRng(0.5);
       const monster = createBabyI();
 
@@ -178,15 +178,15 @@ describe("Balance Simulation (CTL60 / TSS350 / 10k steps) — baseTp + stage fac
 
       const hpAfterEvo = monster.maxHp;
 
-      // Phase 2: Baby II training (×2 factor, larger gains per session)
+      // Phase 2: Baby II training (×1.2 factor)
       const babyIIMenus = [
-        "lsd",             // HP-focused (×2)
-        "lsd",             // HP-focused (×2)
+        "lsd",             // HP-focused
+        "lsd",             // HP-focused
         "lsd",             // HP supplement
-        "vo2max-interval", // ATK-focused (×2)
-        "race-skills",     // ATK-focused (×2)
-        "tempo",           // DEF-focused (×2)
-        "tempo",           // DEF supplement (×2)
+        "vo2max-interval", // ATK-focused
+        "race-skills",     // ATK-focused
+        "tempo",           // DEF-focused
+        "tempo",           // DEF supplement
         "endurance",       // balanced
         "sweet-spot",      // backup
         "hill-climb",      // backup
@@ -208,11 +208,9 @@ describe("Balance Simulation (CTL60 / TSS350 / 10k steps) — baseTp + stage fac
       expect(babyIITrainCount).toBeGreaterThanOrEqual(5);
       expect(babyIITrainCount).toBeLessThanOrEqual(10);
 
-      // ×2 stage factor should produce significant gains from koromon base
-      // One week won't reach full Rookie evo threshold (HP≥120) but should
-      // make meaningful progress (~50-70% of the way from base to threshold)
+      // ×1.2 stage factor should produce meaningful gains from koromon base
       const hpGained = monster.maxHp - hpAfterEvo;
-      expect(hpGained).toBeGreaterThan(20); // meaningful gain from ×2 factor
+      expect(hpGained).toBeGreaterThan(15); // meaningful gain from ×1.2 factor
 
       // Total trainings: ~8-13 with baseTp + ride TP
       const totalTrains = trainCount + babyIITrainCount;

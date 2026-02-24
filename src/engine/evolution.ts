@@ -81,14 +81,11 @@ export function meetsStatRequirements(
   const req = targetDefinition.evolutionRequirement;
   if (!req) return false;
 
-  const equipHp = monster.memoryEquipment?.hp ?? 0;
-  const equipAtk = monster.memoryEquipment?.atk ?? 0;
-  const equipDef = monster.memoryEquipment?.def ?? 0;
-
+  // 装備品は進化条件に寄与しない（純粋なトレーニング成果のみ）
   return (
-    monster.maxHp + equipHp >= req.hp &&
-    monster.atk + equipAtk >= req.atk &&
-    monster.def + equipDef >= req.def
+    monster.maxHp >= req.hp &&
+    monster.atk >= req.atk &&
+    monster.def >= req.def
   );
 }
 
@@ -167,11 +164,15 @@ export function getEvolutionTarget(
   return match ?? definition.evolutionPaths[0];
 }
 
+/** 進化時のステータスブースト比率（baseStatsとの差分の20%を加算） */
+export const EVOLUTION_BOOST_RATIO = 0.2;
+
 /**
  * 進化を実行する（モンスター状態を更新）
  *
- * 進化先のbaseStatsを新しい最低値として適用し、
- * 現在のステータスが進化先のbaseStatsを下回っている場合は引き上げる。
+ * 進化先のbaseStatsと現在値の差分の20%をブーストとして加算する。
+ * 現在値が既にbaseStatsを超えている場合はブーストなし（減少もしない）。
+ * トレーニングで鍛えたステータスがメインで、進化は小さなボーナスのみ。
  *
  * @param monster - 現在のモンスター状態（破壊的に変更）
  * @param targetPath - 進化先のパス
@@ -189,10 +190,14 @@ export function applyEvolution(
   monster.evolutionHistory.push(monster.definitionId);
   monster.definitionId = targetPath.targetId;
 
-  // 進化先のbaseStatsが現在値より高ければ引き上げ
-  monster.maxHp = Math.max(monster.maxHp, targetDef.baseStats.hp);
-  monster.atk = Math.max(monster.atk, targetDef.baseStats.atk);
-  monster.def = Math.max(monster.def, targetDef.baseStats.def);
+  // 差分の20%ブースト（現在値が高ければブーストなし）
+  const hpGap = Math.max(0, targetDef.baseStats.hp - monster.maxHp);
+  const atkGap = Math.max(0, targetDef.baseStats.atk - monster.atk);
+  const defGap = Math.max(0, targetDef.baseStats.def - monster.def);
+
+  monster.maxHp += Math.floor(hpGap * EVOLUTION_BOOST_RATIO);
+  monster.atk += Math.floor(atkGap * EVOLUTION_BOOST_RATIO);
+  monster.def += Math.floor(defGap * EVOLUTION_BOOST_RATIO);
 
   // 進化時にHP全回復
   monster.currentHp = monster.maxHp;

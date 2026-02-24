@@ -101,38 +101,38 @@ describe("Monster Definitions", () => {
 
     it("should match GDD values for Mega", () => {
       const s = STAGE_STAT_TABLE[EvolutionStage.MEGA];
-      expect(s.baseHp).toBe(4250);
-      expect(s.baseAtk).toBe(1437);
-      expect(s.baseDef).toBe(1169);
-      expect(s.capHp).toBe(15000);
-      expect(s.capAtk).toBe(5000);
-      expect(s.capDef).toBe(4000);
+      expect(s.baseHp).toBe(1000);
+      expect(s.baseAtk).toBe(440);
+      expect(s.baseDef).toBe(350);
+      expect(s.capHp).toBe(3500);
+      expect(s.capAtk).toBe(1500);
+      expect(s.capDef).toBe(1200);
     });
   });
 
   describe("Evolution requirements (GDD 6.2)", () => {
-    it("Baby I → Baby II: HP≥50, ATK≥20, DEF≥16, no boss", () => {
+    it("Baby I → Baby II: HP≥22, ATK≥14, DEF≥11, no boss", () => {
       const req = EVOLUTION_REQUIREMENTS[EvolutionStage.BABY_I];
-      expect(req.hp).toBe(50);
-      expect(req.atk).toBe(20);
-      expect(req.def).toBe(16);
+      expect(req.hp).toBe(22);
+      expect(req.atk).toBe(14);
+      expect(req.def).toBe(11);
       expect(req.bossWorld).toBeNull();
     });
 
-    it("Baby II → Rookie: HP≥120, ATK≥55, DEF≥44, no boss", () => {
+    it("Baby II → Rookie: HP≥35, ATK≥20, DEF≥17, no boss", () => {
       const req = EVOLUTION_REQUIREMENTS[EvolutionStage.BABY_II];
-      expect(req.hp).toBe(120);
-      expect(req.atk).toBe(55);
-      expect(req.def).toBe(44);
+      expect(req.hp).toBe(35);
+      expect(req.atk).toBe(20);
+      expect(req.def).toBe(17);
       expect(req.bossWorld).toBeNull();
     });
 
-    it("Ultimate → Mega: HP≥1200, ATK≥500, DEF≥400, W8 boss", () => {
+    it("Ultimate → Mega: HP≥180, ATK≥100, DEF≥85, no boss", () => {
       const req = EVOLUTION_REQUIREMENTS[EvolutionStage.ULTIMATE];
-      expect(req.hp).toBe(1200);
-      expect(req.atk).toBe(500);
-      expect(req.def).toBe(400);
-      expect(req.bossWorld).toBe(8);
+      expect(req.hp).toBe(180);
+      expect(req.atk).toBe(100);
+      expect(req.def).toBe(85);
+      expect(req.bossWorld).toBeNull();
     });
   });
 

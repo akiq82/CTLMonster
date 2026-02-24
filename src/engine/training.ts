@@ -20,17 +20,16 @@ import { randomDecimal, type RngFn } from "../utils/random";
 /**
  * 段階別トレーニング倍率
  *
- * 高い進化段階ほどトレーニング効率が高い。
- * 例: ヒルクライム(食事込み)1セッションあたり HP/ATK/DEF 各+2.2 の場合、
- * Ultimate(×25)では 1セッション実効値 55.0、15セッション合計 825。
+ * 高い進化段階ほどトレーニング効率がわずかに高い（Baby I=×1.0 〜 Mega=×2.0）。
+ * パターン間の差別化はTP供給量（ライド頻度・強度）で生む設計。
  */
 export const STAGE_TRAINING_FACTOR: Record<EvolutionStage, number> = {
-  [EvolutionStage.BABY_I]: 1,
-  [EvolutionStage.BABY_II]: 2,
-  [EvolutionStage.ROOKIE]: 5,
-  [EvolutionStage.CHAMPION]: 10,
-  [EvolutionStage.ULTIMATE]: 25,
-  [EvolutionStage.MEGA]: 60,
+  [EvolutionStage.BABY_I]: 1.0,
+  [EvolutionStage.BABY_II]: 1.2,
+  [EvolutionStage.ROOKIE]: 1.4,
+  [EvolutionStage.CHAMPION]: 1.6,
+  [EvolutionStage.ULTIMATE]: 1.8,
+  [EvolutionStage.MEGA]: 2.0,
 };
 
 /**

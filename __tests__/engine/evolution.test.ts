@@ -96,7 +96,7 @@ describe("Evolution Engine", () => {
       expect(meetsStatRequirements(monster, targetDef)).toBe(false);
     });
 
-    it("memory equipment stats should count toward requirements", () => {
+    it("memory equipment stats should NOT count toward requirements (pure training only)", () => {
       const targetDef = MONSTER_DEFINITIONS.get("greymon")!;
       const req = targetDef.evolutionRequirement!;
       const monster = createTestMonster({
@@ -106,7 +106,8 @@ describe("Evolution Engine", () => {
         def: req.def - 2,
         memoryEquipment: { name: "テストの記憶", hp: 5, atk: 2, def: 2 },
       });
-      expect(meetsStatRequirements(monster, targetDef)).toBe(true);
+      // Equipment is excluded from evolution checks
+      expect(meetsStatRequirements(monster, targetDef)).toBe(false);
     });
 
     it("koromon→agumon condition (agumon's evolutionReq)", () => {
@@ -130,24 +131,13 @@ describe("Evolution Engine", () => {
 
     it("agumon (target, no boss req) → always true", () => {
       const targetDef = MONSTER_DEFINITIONS.get("agumon")!;
-      // agumon's evolutionRequirement = {hp:120, atk:55, def:44, bossWorld:null}
       expect(meetsBossRequirement(targetDef, new Map())).toBe(true);
     });
 
-    it("greymon (target) has W1 boss req → checks W1 progress", () => {
+    it("greymon (target, no boss req) → always true", () => {
       const targetDef = MONSTER_DEFINITIONS.get("greymon")!;
-      // greymon's evolutionRequirement = {hp:375, atk:144, def:117, bossWorld:1}
-
-      // No progress → false
-      expect(meetsBossRequirement(targetDef, new Map())).toBe(false);
-
-      // W1 not defeated → false
-      const notDefeated: WorldProgress = { worldNumber: 1, killCount: 15, bossDefeated: false };
-      expect(meetsBossRequirement(targetDef, new Map([[1, notDefeated]]))).toBe(false);
-
-      // W1 defeated → true
-      const defeated: WorldProgress = { worldNumber: 1, killCount: 15, bossDefeated: true };
-      expect(meetsBossRequirement(targetDef, new Map([[1, defeated]]))).toBe(true);
+      // All evolution boss requirements removed in balance rewrite
+      expect(meetsBossRequirement(targetDef, new Map())).toBe(true);
     });
 
     it("koromon (target, no boss req) → always true", () => {
@@ -158,7 +148,6 @@ describe("Evolution Engine", () => {
 
   describe("canEvolve", () => {
     it("should return true when all conditions met (agumon → champion)", () => {
-      // greymon's evo req: {hp:375, atk:144, def:117, bossWorld:1}
       const greymonDef = MONSTER_DEFINITIONS.get("greymon")!;
       const req = greymonDef.evolutionRequirement!;
       const monster = createTestMonster({
@@ -167,14 +156,11 @@ describe("Evolution Engine", () => {
         atk: req.atk,
         def: req.def,
       });
-      const worldProgress = new Map<number, WorldProgress>([
-        [1, { worldNumber: 1, killCount: 15, bossDefeated: true }],
-      ]);
-      expect(canEvolve(monster, worldProgress)).toBe(true);
+      // No boss requirements in current balance
+      expect(canEvolve(monster, new Map())).toBe(true);
     });
 
     it("should return true for koromon when stats met (agumon has no boss req)", () => {
-      // agumon's evo req: {hp:120, atk:55, def:44, bossWorld:null}
       const agumonDef = MONSTER_DEFINITIONS.get("agumon")!;
       const req = agumonDef.evolutionRequirement!;
       const monster = createTestMonster({
@@ -183,7 +169,6 @@ describe("Evolution Engine", () => {
         atk: req.atk,
         def: req.def,
       });
-      // agumon has no boss requirement, so empty progress is fine
       expect(canEvolve(monster, new Map())).toBe(true);
     });
 
@@ -250,7 +235,7 @@ describe("Evolution Engine", () => {
       expect(monster.evolutionHistory).toContain("koromon");
     });
 
-    it("should raise stats to at least evolved form base stats", () => {
+    it("should apply 20% boost of gap toward evolved form base stats", () => {
       const monster = createTestMonster({
         definitionId: "koromon",
         maxHp: 30,
@@ -260,11 +245,20 @@ describe("Evolution Engine", () => {
       const target = { targetId: "agumon", branchType: BranchType.HP };
       const agumonDef = MONSTER_DEFINITIONS.get("agumon")!;
 
+      const prevHp = monster.maxHp;
+      const prevAtk = monster.atk;
+      const prevDef = monster.def;
+
       applyEvolution(monster, target);
 
-      expect(monster.maxHp).toBeGreaterThanOrEqual(agumonDef.baseStats.hp);
-      expect(monster.atk).toBeGreaterThanOrEqual(agumonDef.baseStats.atk);
-      expect(monster.def).toBeGreaterThanOrEqual(agumonDef.baseStats.def);
+      // 20% of gap between current stats and target base
+      const expectedHpBoost = Math.floor(Math.max(0, agumonDef.baseStats.hp - prevHp) * 0.2);
+      const expectedAtkBoost = Math.floor(Math.max(0, agumonDef.baseStats.atk - prevAtk) * 0.2);
+      const expectedDefBoost = Math.floor(Math.max(0, agumonDef.baseStats.def - prevDef) * 0.2);
+
+      expect(monster.maxHp).toBe(prevHp + expectedHpBoost);
+      expect(monster.atk).toBe(prevAtk + expectedAtkBoost);
+      expect(monster.def).toBe(prevDef + expectedDefBoost);
     });
 
     it("should keep higher stats if already above base", () => {

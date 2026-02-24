@@ -71,18 +71,18 @@ describe("World Definitions", () => {
     }
   });
 
-  describe("GDD 7.3 boss stat verification", () => {
+  describe("Boss stat verification (20% evo boost rebalance)", () => {
     const bossExpected = [
-      { world: 1, hp: 70, atk: 20, def: 15 },
-      { world: 2, hp: 180, atk: 45, def: 35 },
-      { world: 3, hp: 350, atk: 85, def: 65 },
-      { world: 4, hp: 650, atk: 145, def: 115 },
-      { world: 5, hp: 1000, atk: 250, def: 200 },
-      { world: 6, hp: 1800, atk: 400, def: 330 },
-      { world: 7, hp: 3200, atk: 700, def: 560 },
-      { world: 8, hp: 5500, atk: 1100, def: 900 },
-      { world: 9, hp: 9000, atk: 1800, def: 1500 },
-      { world: 10, hp: 15000, atk: 2800, def: 2300 },
+      { world: 1, hp: 60, atk: 15, def: 10 },
+      { world: 2, hp: 108, atk: 26, def: 20 },
+      { world: 3, hp: 150, atk: 39, def: 30 },
+      { world: 4, hp: 230, atk: 45, def: 38 },
+      { world: 5, hp: 249, atk: 50, def: 40 },
+      { world: 6, hp: 398, atk: 75, def: 59 },
+      { world: 7, hp: 502, atk: 91, def: 55 },
+      { world: 8, hp: 701, atk: 120, def: 75 },
+      { world: 9, hp: 852, atk: 151, def: 89 },
+      { world: 10, hp: 1001, atk: 175, def: 111 },
     ];
 
     for (const expected of bossExpected) {
@@ -95,22 +95,22 @@ describe("World Definitions", () => {
     }
   });
 
-  describe("GDD 7.3 mob stat range verification", () => {
+  describe("Mob stat range verification (20% evo boost rebalance)", () => {
     const mobRanges = [
-      { world: 1, hpMin: 15, hpMax: 35, atkMin: 5, atkMax: 12, defMin: 3, defMax: 8 },
-      { world: 2, hpMin: 40, hpMax: 90, atkMin: 15, atkMax: 30, defMin: 10, defMax: 22 },
-      { world: 3, hpMin: 80, hpMax: 180, atkMin: 28, atkMax: 55, defMin: 20, defMax: 40 },
-      { world: 4, hpMin: 160, hpMax: 350, atkMin: 50, atkMax: 100, defMin: 40, defMax: 75 },
-      { world: 5, hpMin: 300, hpMax: 600, atkMin: 90, atkMax: 170, defMin: 70, defMax: 130 },
-      { world: 6, hpMin: 500, hpMax: 1000, atkMin: 150, atkMax: 280, defMin: 120, defMax: 220 },
-      { world: 7, hpMin: 900, hpMax: 1800, atkMin: 260, atkMax: 480, defMin: 210, defMax: 380 },
-      { world: 8, hpMin: 1600, hpMax: 3000, atkMin: 450, atkMax: 800, defMin: 360, defMax: 620 },
-      { world: 9, hpMin: 2800, hpMax: 5000, atkMin: 780, atkMax: 1400, defMin: 620, defMax: 1100 },
-      { world: 10, hpMin: 4500, hpMax: 8000, atkMin: 1250, atkMax: 2200, defMin: 1000, defMax: 1760 },
+      { world: 1, hpMin: 13, hpMax: 30, atkMin: 4, atkMax: 9, defMin: 2, defMax: 6 },
+      { world: 2, hpMin: 24, hpMax: 54, atkMin: 9, atkMax: 17, defMin: 6, defMax: 13 },
+      { world: 3, hpMin: 34, hpMax: 77, atkMin: 13, atkMax: 26, defMin: 9, defMax: 18 },
+      { world: 4, hpMin: 57, hpMax: 124, atkMin: 16, atkMax: 31, defMin: 13, defMax: 25 },
+      { world: 5, hpMin: 75, hpMax: 150, atkMin: 17, atkMax: 33, defMin: 14, defMax: 26 },
+      { world: 6, hpMin: 110, hpMax: 221, atkMin: 28, atkMax: 53, defMin: 22, defMax: 40 },
+      { world: 7, hpMin: 141, hpMax: 282, atkMin: 33, atkMax: 62, defMin: 21, defMax: 38 },
+      { world: 8, hpMin: 204, hpMax: 383, atkMin: 49, atkMax: 87, defMin: 30, defMax: 52 },
+      { world: 9, hpMin: 265, hpMax: 473, atkMin: 66, atkMax: 117, defMin: 37, defMax: 66 },
+      { world: 10, hpMin: 300, hpMax: 534, atkMin: 78, atkMax: 137, defMin: 48, defMax: 85 },
     ];
 
     for (const range of mobRanges) {
-      it(`W${range.world} mob stats should fall within GDD ranges`, () => {
+      it(`W${range.world} mob stats should fall within expected ranges`, () => {
         const world = WORLD_MAP.get(range.world)!;
         const allHpMin = Math.min(...world.enemies.map((e) => e.hp.min));
         const allHpMax = Math.max(...world.enemies.map((e) => e.hp.max));
