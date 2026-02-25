@@ -26,9 +26,13 @@ export interface HealthData {
 }
 
 /**
- * Health Connect の初期化・権限リクエスト
+ * Health Connect SDK の初期化のみ (権限リクエストなし)
  *
- * @returns 権限が付与されたか
+ * 起動時に安全に呼べる。requestPermission() は Activity が完全に
+ * 準備されていないと HealthConnectPermissionDelegate の lateinit が
+ * 未初期化のままクラッシュするため、ここでは呼ばない。
+ *
+ * @returns SDK の初期化が成功したか
  */
 export async function initializeHealthConnect(): Promise<boolean> {
   if (Platform.OS !== "android") {
@@ -36,12 +40,28 @@ export async function initializeHealthConnect(): Promise<boolean> {
   }
 
   try {
-    const { initialize, requestPermission } = await import(
-      "react-native-health-connect"
-    );
+    const { initialize } = await import("react-native-health-connect");
+    return await initialize();
+  } catch {
+    return false;
+  }
+}
 
-    const isInitialized = await initialize();
-    if (!isInitialized) return false;
+/**
+ * Health Connect の権限をリクエストする
+ *
+ * Activity が完全に準備された後 (ユーザーが設定画面で明示的にONにした時) に
+ * のみ呼ぶこと。起動直後に呼ぶとネイティブ側でクラッシュする。
+ *
+ * @returns 権限が付与されたか
+ */
+export async function requestHealthConnectPermissions(): Promise<boolean> {
+  if (Platform.OS !== "android") {
+    return false;
+  }
+
+  try {
+    const { requestPermission } = await import("react-native-health-connect");
 
     const granted = await requestPermission([
       { accessType: "read", recordType: "Steps" },

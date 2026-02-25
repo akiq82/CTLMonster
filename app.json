@@ -46,7 +46,6 @@
           ]
         }
       ],
-      "./plugins/withHealthConnectPermissions",
       [
         "expo-build-properties",
         {

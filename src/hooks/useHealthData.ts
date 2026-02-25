@@ -75,7 +75,8 @@ export function useHealthData(): HealthData {
       return;
     }
 
-    // 初回: Health Connect の権限を初期化
+    // 初回: Health Connect SDK を初期化 (権限リクエストは行わない)
+    // 権限は設定画面で toggleHealthConnect した時に別途リクエスト済み
     async function init() {
       if (!initializedRef.current) {
         initializedRef.current = true;
@@ -83,7 +84,7 @@ export function useHealthData(): HealthData {
         if (!ok) {
           setData((d) => ({
             ...d,
-            error: "Health Connect の権限が付与されていません",
+            error: "Health Connect の初期化に失敗しました",
           }));
           return;
         }

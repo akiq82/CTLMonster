@@ -13,6 +13,10 @@ import { useWorldStore } from "../src/store/world-store";
 import { useEncyclopediaStore } from "../src/store/encyclopedia-store";
 import { useSlotStore } from "../src/store/slot-store";
 import { syncWorkouts } from "../src/services/daily-sync";
+import {
+  initializeHealthConnect,
+  requestHealthConnectPermissions,
+} from "../src/services/health-connect";
 
 function ToggleRow({
   label,
@@ -59,6 +63,22 @@ export default function SettingsScreen() {
   const [syncStatus, setSyncStatus] = useState<"idle" | "syncing" | "done">("idle");
   const [syncMessage, setSyncMessage] = useState("");
   const [resetConfirm, setResetConfirm] = useState(false);
+
+  /** Health Connect トグル: ON時に SDK初期化 + 権限リクエスト */
+  const handleToggleHealthConnect = useCallback(async () => {
+    if (healthConnectEnabled) {
+      // OFF にする場合はそのまま
+      toggleHealthConnect();
+      return;
+    }
+    // ON にする場合: SDK初期化 → 権限リクエスト → 成功時のみON
+    const initialized = await initializeHealthConnect();
+    if (!initialized) return;
+    const granted = await requestHealthConnectPermissions();
+    if (granted) {
+      toggleHealthConnect();
+    }
+  }, [healthConnectEnabled, toggleHealthConnect]);
 
   const handleReset = useCallback(() => {
     if (!resetConfirm) {
@@ -132,7 +152,7 @@ export default function SettingsScreen() {
             <ToggleRow
               label="Health Connect"
               value={healthConnectEnabled}
-              onToggle={toggleHealthConnect}
+              onToggle={handleToggleHealthConnect}
             />
           ) : (
             <View style={styles.infoRow}>
@@ -214,54 +234,54 @@ const styles = StyleSheet.create({
   },
   title: {
     color: LCD_COLORS.DOT,
-    fontSize: 12,
+    fontSize: 16,
     fontWeight: "bold",
     fontFamily: "monospace",
     textAlign: "center",
-    marginBottom: 8,
+    marginBottom: 10,
   },
   section: {
     color: LCD_COLORS.DOT,
-    fontSize: 9,
+    fontSize: 12,
     fontWeight: "bold",
     fontFamily: "monospace",
-    marginTop: 10,
-    marginBottom: 4,
+    marginTop: 12,
+    marginBottom: 5,
     borderBottomWidth: 1,
     borderBottomColor: LCD_COLORS.DOT_MID,
-    paddingBottom: 2,
+    paddingBottom: 3,
   },
   toggleRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingVertical: 6,
-    paddingHorizontal: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 6,
   },
   infoRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingVertical: 6,
-    paddingHorizontal: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 6,
   },
   toggleLabel: {
     color: LCD_COLORS.DOT,
-    fontSize: 10,
+    fontSize: 14,
     fontFamily: "monospace",
   },
   toggleValue: {
     color: LCD_COLORS.DOT_LIGHT,
-    fontSize: 10,
+    fontSize: 14,
     fontWeight: "bold",
     fontFamily: "monospace",
   },
   syncRow: {
-    paddingHorizontal: 4,
-    paddingVertical: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 5,
   },
   syncButton: {
     backgroundColor: LCD_COLORS.DOT_MID,
-    paddingVertical: 4,
-    paddingHorizontal: 12,
+    paddingVertical: 6,
+    paddingHorizontal: 16,
     alignSelf: "flex-start",
   },
   syncButtonDisabled: {
@@ -269,24 +289,24 @@ const styles = StyleSheet.create({
   },
   syncButtonText: {
     color: LCD_COLORS.BG,
-    fontSize: 9,
+    fontSize: 12,
     fontWeight: "bold",
     fontFamily: "monospace",
   },
   syncMessage: {
     color: LCD_COLORS.DOT_LIGHT,
-    fontSize: 8,
+    fontSize: 11,
     fontFamily: "monospace",
-    marginTop: 3,
+    marginTop: 4,
   },
   resetRow: {
-    paddingHorizontal: 4,
-    paddingVertical: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 5,
   },
   resetButton: {
     backgroundColor: LCD_COLORS.DOT_MID,
-    paddingVertical: 4,
-    paddingHorizontal: 12,
+    paddingVertical: 6,
+    paddingHorizontal: 16,
     alignSelf: "flex-start",
   },
   resetButtonConfirm: {
@@ -294,7 +314,7 @@ const styles = StyleSheet.create({
   },
   resetButtonText: {
     color: LCD_COLORS.BG,
-    fontSize: 9,
+    fontSize: 12,
     fontWeight: "bold",
     fontFamily: "monospace",
   },
@@ -302,27 +322,27 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    marginTop: 4,
+    marginTop: 5,
   },
   resetWarning: {
     color: LCD_COLORS.DOT,
-    fontSize: 8,
+    fontSize: 11,
     fontFamily: "monospace",
     flex: 1,
   },
   resetCancel: {
     color: LCD_COLORS.DOT_LIGHT,
-    fontSize: 9,
+    fontSize: 12,
     fontWeight: "bold",
     fontFamily: "monospace",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
   },
   version: {
     color: LCD_COLORS.DOT_MID,
-    fontSize: 8,
+    fontSize: 11,
     fontFamily: "monospace",
     textAlign: "center",
-    marginTop: 16,
+    marginTop: 20,
   },
 });
