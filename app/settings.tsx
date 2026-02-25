@@ -63,20 +63,30 @@ export default function SettingsScreen() {
   const [syncStatus, setSyncStatus] = useState<"idle" | "syncing" | "done">("idle");
   const [syncMessage, setSyncMessage] = useState("");
   const [resetConfirm, setResetConfirm] = useState(false);
+  const [hcError, setHcError] = useState("");
 
   /** Health Connect トグル: ON時に SDK初期化 + 権限リクエスト */
   const handleToggleHealthConnect = useCallback(async () => {
+    setHcError("");
     if (healthConnectEnabled) {
-      // OFF にする場合はそのまま
       toggleHealthConnect();
       return;
     }
     // ON にする場合: SDK初期化 → 権限リクエスト → 成功時のみON
-    const initialized = await initializeHealthConnect();
-    if (!initialized) return;
-    const granted = await requestHealthConnectPermissions();
-    if (granted) {
-      toggleHealthConnect();
+    try {
+      const initialized = await initializeHealthConnect();
+      if (!initialized) {
+        setHcError("Health Connect SDK の初期化に失敗。アプリが最新か確認してください。");
+        return;
+      }
+      const granted = await requestHealthConnectPermissions();
+      if (granted) {
+        toggleHealthConnect();
+      } else {
+        setHcError("権限が付与されませんでした。Health Connect の設定を確認してください。");
+      }
+    } catch (e) {
+      setHcError(`エラー: ${e instanceof Error ? e.message : String(e)}`);
     }
   }, [healthConnectEnabled, toggleHealthConnect]);
 
@@ -149,11 +159,16 @@ export default function SettingsScreen() {
 
           <Text style={styles.section}>Connections</Text>
           {Platform.OS === "android" ? (
-            <ToggleRow
-              label="Health Connect"
-              value={healthConnectEnabled}
-              onToggle={handleToggleHealthConnect}
-            />
+            <>
+              <ToggleRow
+                label="Health Connect"
+                value={healthConnectEnabled}
+                onToggle={handleToggleHealthConnect}
+              />
+              {hcError !== "" && (
+                <Text style={styles.hcError}>{hcError}</Text>
+              )}
+            </>
           ) : (
             <View style={styles.infoRow}>
               <Text style={styles.toggleLabel}>Health Connect</Text>
@@ -225,8 +240,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#1a1a2e",
     alignItems: "center",
-    justifyContent: "center",
-    padding: 16,
+    padding: 8,
   },
   scroll: {
     flex: 1,
@@ -273,6 +287,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
     fontFamily: "monospace",
+  },
+  hcError: {
+    color: LCD_COLORS.DOT,
+    fontSize: 11,
+    fontFamily: "monospace",
+    paddingHorizontal: 6,
+    paddingBottom: 4,
+    opacity: 0.8,
   },
   syncRow: {
     paddingHorizontal: 6,

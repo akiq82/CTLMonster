@@ -113,14 +113,14 @@ const styles = StyleSheet.create({
   body: {
     backgroundColor: LCD_COLORS.BODY,
     borderRadius: 24,
-    padding: 20,
+    padding: 16,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
-    maxWidth: 480,
+    flex: 1,
     width: "100%",
   },
   title: {
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   screen: {
     backgroundColor: LCD_COLORS.BG,
     borderRadius: 4,
-    minHeight: 380,
+    flex: 1,
     width: "100%",
     overflow: "hidden",
     position: "relative",
