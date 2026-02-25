@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: LCD_COLORS.DOT,
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: "bold",
     fontFamily: "monospace",
     marginBottom: 12,
@@ -221,19 +221,19 @@ const styles = StyleSheet.create({
   },
   fighterName: {
     color: LCD_COLORS.DOT,
-    fontSize: 10,
+    fontSize: 13,
     fontWeight: "bold",
     fontFamily: "monospace",
     marginBottom: 2,
   },
   fighterStat: {
     color: LCD_COLORS.DOT_LIGHT,
-    fontSize: 9,
+    fontSize: 12,
     fontFamily: "monospace",
   },
   vsText: {
     color: LCD_COLORS.DOT_LIGHT,
-    fontSize: 11,
+    fontSize: 14,
     fontFamily: "monospace",
     marginHorizontal: 4,
   },
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
   },
   turnLabel: {
     color: LCD_COLORS.DOT,
-    fontSize: 10,
+    fontSize: 13,
     fontWeight: "bold",
     fontFamily: "monospace",
     marginBottom: 8,
@@ -258,14 +258,14 @@ const styles = StyleSheet.create({
   },
   attackerText: {
     color: LCD_COLORS.DOT,
-    fontSize: 10,
+    fontSize: 13,
     fontWeight: "bold",
     fontFamily: "monospace",
     marginBottom: 2,
   },
   resultText: {
     color: LCD_COLORS.DOT,
-    fontSize: 11,
+    fontSize: 14,
     fontFamily: "monospace",
   },
   hpRow: {
@@ -275,18 +275,18 @@ const styles = StyleSheet.create({
   },
   hpText: {
     color: LCD_COLORS.DOT_LIGHT,
-    fontSize: 9,
+    fontSize: 12,
     fontFamily: "monospace",
   },
   resultBig: {
     color: LCD_COLORS.DOT,
-    fontSize: 20,
+    fontSize: 28,
     fontWeight: "bold",
     fontFamily: "monospace",
   },
   subText: {
     color: LCD_COLORS.DOT_LIGHT,
-    fontSize: 10,
+    fontSize: 13,
     fontFamily: "monospace",
     marginTop: 4,
   },

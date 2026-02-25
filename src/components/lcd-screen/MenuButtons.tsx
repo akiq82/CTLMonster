@@ -51,13 +51,13 @@ export function MenuButtons({ items, selectedIndex }: MenuButtonsProps) {
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
     paddingVertical: 4,
   },
   menuItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 3,
+    paddingVertical: 5,
     paddingHorizontal: 4,
   },
   selected: {
@@ -66,17 +66,17 @@ const styles = StyleSheet.create({
   },
   cursor: {
     color: LCD_COLORS.DOT,
-    fontSize: 10,
+    fontSize: 13,
     marginRight: 4,
     fontFamily: "monospace",
   },
   icon: {
-    fontSize: 10,
+    fontSize: 13,
     marginRight: 4,
   },
   label: {
     color: LCD_COLORS.DOT_LIGHT,
-    fontSize: 11,
+    fontSize: 14,
     fontFamily: "monospace",
   },
   selectedLabel: {

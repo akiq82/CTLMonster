@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: LCD_COLORS.DOT,
-    fontSize: 12,
+    fontSize: 16,
     fontWeight: "bold",
     fontFamily: "monospace",
     textAlign: "center",
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   menuItem: {
-    paddingVertical: 4,
+    paddingVertical: 6,
     paddingHorizontal: 6,
     borderBottomWidth: 1,
     borderBottomColor: LCD_COLORS.DOT_MID,
@@ -89,18 +89,18 @@ const styles = StyleSheet.create({
   },
   menuName: {
     color: LCD_COLORS.DOT,
-    fontSize: 11,
+    fontSize: 14,
     fontWeight: "bold",
     fontFamily: "monospace",
   },
   menuCost: {
     color: LCD_COLORS.DOT_LIGHT,
-    fontSize: 8,
+    fontSize: 11,
     fontFamily: "monospace",
   },
   menuGain: {
     color: LCD_COLORS.DOT_LIGHT,
-    fontSize: 8,
+    fontSize: 11,
     fontFamily: "monospace",
   },
   disabledText: {
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   },
   backText: {
     color: LCD_COLORS.DOT,
-    fontSize: 10,
+    fontSize: 13,
     fontWeight: "bold",
     fontFamily: "monospace",
   },

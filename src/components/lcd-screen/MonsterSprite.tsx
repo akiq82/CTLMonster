@@ -212,7 +212,7 @@ export function MonsterSprite({
 
   // Auto pixel size based on stage
   const autoPixelSize =
-    stage <= EvolutionStage.BABY_II ? 8 : stage <= EvolutionStage.ROOKIE ? 5 : 4;
+    stage <= EvolutionStage.BABY_II ? 10 : stage <= EvolutionStage.ROOKIE ? 6 : 5;
   const px = pixelSize ?? autoPixelSize;
 
   const getColor = (value: number): string | null => {

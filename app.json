@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "CTLMonster",
-    "slug": "CTLMonster",
+    "slug": "tss-monseter",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -17,6 +17,7 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.akiq82.ctlmonster",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#1a1a2e"
@@ -36,7 +37,31 @@
     "plugins": [
       "expo-router",
       "expo-notifications",
-      "react-native-health-connect"
-    ]
+      [
+        "react-native-health-connect",
+        {
+          "requestPermissions": [
+            "android.permission.health.READ_STEPS",
+            "android.permission.health.READ_FLOORS_CLIMBED"
+          ]
+        }
+      ],
+      "./plugins/withHealthConnectPermissions",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 26
+          }
+        }
+      ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "91bdaabb-9520-458d-b520-4873dba740e6"
+      }
+    },
+    "owner": "redpark82s-organization"
   }
 }

@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   },
   evolveText: {
     color: LCD_COLORS.DOT,
-    fontSize: 16,
+    fontSize: 22,
     fontWeight: "bold",
     fontFamily: "monospace",
     marginBottom: 16,
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
   },
   nameText: {
     color: LCD_COLORS.DOT,
-    fontSize: 14,
+    fontSize: 18,
     fontWeight: "bold",
     fontFamily: "monospace",
     marginTop: 8,

@@ -126,8 +126,8 @@ export function StatusBars({
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
   },
   barRow: {
     flexDirection: "row",
@@ -136,9 +136,9 @@ const styles = StyleSheet.create({
   },
   barLabel: {
     color: LCD_COLORS.DOT,
-    fontSize: 10,
+    fontSize: 13,
     fontWeight: "bold",
-    width: 20,
+    width: 26,
     fontFamily: "monospace",
   },
   barContainer: {
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
   },
   barSegment: {
     flex: 1,
-    height: 6,
+    height: 8,
     marginHorizontal: 0.5,
   },
   barFilled: {
@@ -160,9 +160,9 @@ const styles = StyleSheet.create({
   },
   barValue: {
     color: LCD_COLORS.DOT,
-    fontSize: 8,
+    fontSize: 11,
     fontFamily: "monospace",
-    width: 48,
+    width: 60,
     textAlign: "right",
   },
   infoRow: {
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
   },
   infoText: {
     color: LCD_COLORS.DOT_LIGHT,
-    fontSize: 8,
+    fontSize: 11,
     fontFamily: "monospace",
   },
   countersRow: {
@@ -184,13 +184,13 @@ const styles = StyleSheet.create({
   },
   counterText: {
     color: LCD_COLORS.DOT,
-    fontSize: 9,
+    fontSize: 12,
     fontFamily: "monospace",
     fontWeight: "bold",
   },
   counterHighlight: {
     color: LCD_COLORS.DOT,
-    fontSize: 9,
+    fontSize: 12,
     fontFamily: "monospace",
     fontWeight: "bold",
     backgroundColor: LCD_COLORS.DOT_MID,

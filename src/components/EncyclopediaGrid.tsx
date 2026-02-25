@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: LCD_COLORS.DOT,
-    fontSize: 11,
+    fontSize: 14,
     fontWeight: "bold",
     fontFamily: "monospace",
     textAlign: "center",
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
   },
   stageLabel: {
     color: LCD_COLORS.DOT_LIGHT,
-    fontSize: 9,
+    fontSize: 12,
     fontFamily: "monospace",
     marginTop: 4,
     marginBottom: 2,
@@ -134,11 +134,11 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 2,
+    gap: 3,
   },
   cell: {
-    width: 42,
-    height: 28,
+    width: 54,
+    height: 36,
     backgroundColor: LCD_COLORS.DOT_MID,
     borderRadius: 2,
     alignItems: "center",
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
   },
   cellText: {
     color: LCD_COLORS.DOT,
-    fontSize: 7,
+    fontSize: 10,
     fontFamily: "monospace",
     fontWeight: "bold",
   },
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
   },
   backText: {
     color: LCD_COLORS.DOT,
-    fontSize: 10,
+    fontSize: 13,
     fontWeight: "bold",
     fontFamily: "monospace",
   },

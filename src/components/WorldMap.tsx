@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: LCD_COLORS.DOT,
-    fontSize: 12,
+    fontSize: 16,
     fontWeight: "bold",
     fontFamily: "monospace",
     textAlign: "center",
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   worldItem: {
-    paddingVertical: 6,
+    paddingVertical: 8,
     paddingHorizontal: 6,
     borderBottomWidth: 1,
     borderBottomColor: LCD_COLORS.DOT_MID,
@@ -125,14 +125,14 @@ const styles = StyleSheet.create({
   },
   worldNumber: {
     color: LCD_COLORS.DOT,
-    fontSize: 10,
+    fontSize: 13,
     fontWeight: "bold",
     fontFamily: "monospace",
-    width: 28,
+    width: 36,
   },
   worldName: {
     color: LCD_COLORS.DOT,
-    fontSize: 10,
+    fontSize: 13,
     fontFamily: "monospace",
     flex: 1,
   },
@@ -141,10 +141,10 @@ const styles = StyleSheet.create({
   },
   clearedBadge: {
     color: LCD_COLORS.DOT,
-    fontSize: 12,
+    fontSize: 16,
   },
   progressBar: {
-    height: 3,
+    height: 4,
     backgroundColor: LCD_COLORS.DOT_MID,
     borderRadius: 1,
     marginTop: 2,
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
   },
   backText: {
     color: LCD_COLORS.DOT,
-    fontSize: 10,
+    fontSize: 13,
     fontWeight: "bold",
     fontFamily: "monospace",
   },
