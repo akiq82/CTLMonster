@@ -136,6 +136,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 6,
     width: "100%",
+    flex: 1,
   },
   screen: {
     backgroundColor: LCD_COLORS.BG,
